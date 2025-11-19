@@ -8,7 +8,7 @@ const slides = [
   {
     type: 'cover', 
     image: '/photos/cover.jpg', 
-    printText: '14岁时的初遇，19岁时的再重逢.\n这是Ty & Leon再相遇的故事。', 
+    printText: '14岁时的初遇，19岁时的重逢.\n这是Leon & Ty的故事。', 
   },
   {
     type: 'content', 

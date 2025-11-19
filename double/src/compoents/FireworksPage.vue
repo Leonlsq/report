@@ -154,8 +154,8 @@ function drawBackground() {
   if (!ctx) return;
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
   gradient.addColorStop(0, CONFIG.skyColor);
-  gradient.addColorStop(0.8, CONFIG.horizonColor); 
-  gradient.addColorStop(1, '#0a0a1a'); 
+  gradient.addColorStop(0.85, CONFIG.horizonColor); 
+  gradient.addColorStop(1, '#050510'); 
   
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
@@ -303,7 +303,7 @@ function drawReflection() {
   if (!ctx) return;
   const horizonY = height * 0.85; 
 
-  ctx.fillStyle = '#03030a';
+  ctx.fillStyle = '#010105';
   ctx.fillRect(0, horizonY, width, height - horizonY);
 
   for (let i = 0; i < particles.length; i++) {
@@ -311,13 +311,12 @@ function drawReflection() {
     if (p.y < horizonY) {
       const distanceToHorizon = horizonY - p.y;
       const reflectionY = horizonY + distanceToHorizon; 
-      const waveX = Math.sin(Date.now() * 0.005 + p.y * 0.05) * 10;
+      const waveX = Math.sin(Date.now() * 0.005 + p.y * 0.05) * 3;
       
-      ctx.globalAlpha = p.alpha * 0.25; 
+      ctx.globalAlpha = p.alpha * 0.05; 
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.ellipse(p.x + waveX, reflectionY, p.size * 2, p.size * 0.5, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.ellipse(p.x + waveX, reflectionY, p.size * 2, p.size * 0.3, 0, 0, Math.PI * 2);      ctx.fill();
     }
   }
   ctx.globalAlpha = 1;
