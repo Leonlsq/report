@@ -49,6 +49,8 @@ const cursorVisible = ref(true)
 const showFireworksPage = ref(false)
 const audioRef = ref<HTMLAudioElement | null>(null)
 const isMusicPlaying = ref(false)
+// ⭐ 新增状态：追踪封面页打字是否完成
+const isTypingFinished = ref(false) 
 
 // 控制内容页显示到第几句话
 const contentStep = ref(1)
@@ -80,6 +82,8 @@ const toggleMusic = () => {
 // 打字机效果
 let typeInterval: number | null = null
 const typewriterEffect = (text: string, delay = 100) => {
+  // ⭐ 每次开始打字时，设置为 false
+  isTypingFinished.value = false 
   displayedText.value = ''
   cursorVisible.value = true
   if (typeInterval) clearInterval(typeInterval)
@@ -91,6 +95,8 @@ const typewriterEffect = (text: string, delay = 100) => {
     } else {
       if (typeInterval) clearInterval(typeInterval)
       cursorVisible.value = false 
+      // ⭐ 打字完成时，设置为 true
+      isTypingFinished.value = true
     }
   }, delay)
 }
@@ -105,12 +111,20 @@ watch(currentIndex, () => {
 
 // 核心翻页交互逻辑
 const nextSlide = () => {
+  // ⭐ 核心修改: 如果当前是封面页且打字未完成，则执行 return，阻止所有操作
+  if (currentSlide.value.type === 'cover' && !isTypingFinished.value) {
+    // 仅仅阻止，不提前结束打字机效果
+    return 
+  }
+
+  // 播放音乐逻辑 (保持不变)
   if (audioRef.value && audioRef.value.paused && !isMusicPlaying.value) {
     audioRef.value.play()
       .then(() => { isMusicPlaying.value = true })
       .catch((e) => console.log('等待交互播放', e))
   }
 
+  // 内容页点击逻辑 (显示下一句话)
   if (currentSlide.value.type === 'content') {
     if (contentStep.value < currentSlideSentences.value.length) {
       contentStep.value++
@@ -118,6 +132,7 @@ const nextSlide = () => {
     }
   }
 
+  // 翻页和结束逻辑
   if (currentIndex.value === slides.length - 1) {
     showFireworksPage.value = true
   } else if (currentIndex.value < slides.length - 1) {
@@ -456,7 +471,7 @@ body, html {
   white-space: pre-line;
   font-family: 'ZCOOL KuaiLe', cursive, "Microsoft YaHei", sans-serif;
   font-size: 1.4rem;
-  animation: soft-float-up 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: soft-float-up 4.0s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* --- 📱 移动端适配 (手机上不破框，恢复正常布局) --- */
