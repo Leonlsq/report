@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue' 
+import { ref, computed, watch, onMounted, nextTick } from 'vue' 
 // 👇 请确保路径正确
 import FireworksPage from './compoents/FireworksPage.vue'
 // 👇 引入新的解锁组件
@@ -10,7 +10,7 @@ const isLoading = ref(true)
 const loadProgress = ref(0)
 const showDeviceSelector = ref(false) 
 const deviceMode = ref('') 
-const isLocked = ref(true) // ⭐ 新增：控制是否显示解锁界面
+const isLocked = ref(true) 
 
 // --- 1. 数据配置区 (保持不变) ---
 const slides = [
@@ -64,7 +64,7 @@ const slides = [
     title: '📹 7分30秒，热闹里的“暂停键”',
     image: '/photos/c1.png',
     date: '2025.10.04 - 脱离苦海',
-    text: '搬进新家那天，感觉又被治愈了，说来又是幸运的一次。我迫不及待地拍了这个视频发给你，虽然名字叫‘脱离苦海’，但心里想的其实是——‘我想和你分享这份安稳’。\n\n现在回看，让我感慨和触动的不是当时有多幸运找到这样一个房子，而是你说‘和朋友在一起，视频看了一半’，最后又补了一句‘看完了’。\n\n即使在你热闹的生活里，你也愿意特意留出那漫长的7分30秒，透过屏幕来陪我。这份‘在意’，比房子更让我心安。',
+    text: '搬进新家那天，感觉又被治愈了，说来又是幸运的一次。我迫不及待地拍了这个视频发给你，虽然名字叫‘脱离苦海’，但心里想的其实是‘想和你分享这份安稳’。\n\n现在回看，让我感慨和触动的不是当时有多幸运找到这样一个房子，而是你说‘和朋友在一起，视频看了一半’，最后又补了一句‘看完了’。\n\n即使在你热闹的生活里，你也愿意特意留出那漫长的7分30秒，透过屏幕来陪我。这份‘在意’，比房子更让我心安。',
     backgroundType: 'image', 
     backgroundImage: '/photos/c2.jpg', 
   },
@@ -152,9 +152,25 @@ const nextSlide = () => {
       .catch((e) => console.log('等待交互播放', e))
   }
 
+  // ⭐ 修改点：自动滚动逻辑
   if (currentSlide.value.type === 'content') {
     if (contentStep.value < currentSlideSentences.value.length) {
       contentStep.value++
+      
+      // ⭐⭐⭐ 核心功能：自动滚动到底部 ⭐⭐⭐
+      // 使用 nextTick 确保 DOM 更新后再滚动
+      nextTick(() => {
+        // 找到手机端的滚动容器（即 content-main）
+        const container = document.querySelector('.mode-mobile .content-main')
+        if (container) {
+          // 平滑滚动到底部
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+          })
+        }
+      })
+
       return 
     }
   }
@@ -174,6 +190,11 @@ const nextSlide = () => {
     setTimeout(() => {
       currentIndex.value++
       isAnimate.value = false
+      // 翻页后也要重置滚动位置到顶部
+      nextTick(() => {
+        const container = document.querySelector('.mode-mobile .content-main')
+        if (container) container.scrollTop = 0
+      })
     }, 500) 
   }
 }
@@ -182,7 +203,6 @@ const nextSlide = () => {
 const selectDevice = (mode: string) => {
   deviceMode.value = mode
   showDeviceSelector.value = false
-  // ⭐ 修改：选完设备后，不再直接播放音乐，而是等待解锁界面
 }
 
 // ⭐ 新增：处理解锁成功事件
@@ -407,45 +427,56 @@ body, html {
 }
 
 /* --- 📱 Mobile (Phone) 深度适配优化 --- */
+/* ⭐ 修复：确保容器居中，不向右偏移 */
 .app-container.mode-mobile .content-main {
+  display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* 从顶部开始排列，而不是居中 */
-  align-items: center;
-  gap: 15px; /* 减小图片和文字的间距 (原30px) */
+  justify-content: flex-start; /* 从顶部开始排列 */
+  align-items: center;         /* 水平居中 */
+  gap: 15px; 
   
-  /* 调整容器尺寸和边距 */
-  width: 88%;
+  /* 尺寸和边距修复 */
+  width: 90%; /* 稍微收缩宽度，留出边距 */
+  max-width: 400px; /* 限制最大宽度，防止在大屏手机拉伸 */
   height: auto;
-  max-height: 80vh; /* 限制最大高度，防止超出屏幕 */
-  padding: 25px 20px; /* 减小左右内边距 */
-  margin-top: 0; /* 去掉顶部额外边距 */
+  max-height: 85vh; /* 增加可视高度 */
   
-  /* 关键：如果内容太多，允许卡片内部滚动 */
+  padding: 25px 20px; 
+  margin: 20px auto 0 auto; /* 确保居中 */
+  
+  /* 滚动支持 */
   overflow-y: auto !important; 
   -webkit-overflow-scrolling: touch;
+  
+  /* 防止内容被挤出 */
+  box-sizing: border-box;
 }
 
 /* 1. 缩小拍立得图片 */
 .app-container.mode-mobile .polaroid {
-  width: 200px; /* 缩小宽度 (原280px) */
-  padding: 10px 10px 35px 10px; /* 减小拍立得留白 */
-  margin: 0;
-  transform: rotate(-1deg); /* 减小旋转角度，节省边缘空间 */
-  flex-shrink: 0; /* 防止图片被压扁 */
+  width: 200px; 
+  padding: 10px 10px 35px 10px; 
+  /* 这里的 margin 会影响居中，一定要重置 */
+  margin: 0 auto; 
+  transform: rotate(-1deg); 
+  flex-shrink: 0; 
 }
 
 /* 2. 缩小拼贴画容器 */
 .app-container.mode-mobile .photo-collage {
-  width: 240px;
+  width: 260px;
   height: 220px;
-  margin: 0 auto;
-  transform: scale(0.9); /* 整体缩小一点 */
+  /* 修复偏移：重置 margin */
+  margin: 0 auto; 
+  left: 0;
+  top: 0;
+  transform: scale(0.9); 
 }
 .app-container.mode-mobile .collage-1, 
 .app-container.mode-mobile .collage-2, 
 .app-container.mode-mobile .collage-3, 
 .app-container.mode-mobile .collage-4 {
-  width: 110px; /* 缩小单张拼贴图 */
+  width: 120px; /* 稍微调大一点点 */
 }
 
 /* 3. 紧凑化文字区域 */
@@ -453,6 +484,8 @@ body, html {
   text-align: center; 
   width: 100%;
   padding-left: 0;
+  /* 增加底部留白，防止最后一行被切断 */
+  padding-bottom: 40px; 
 }
 
 /* 标题缩小 */
@@ -471,9 +504,9 @@ body, html {
 
 /* 正文缩小并增加行高 */
 .app-container.mode-mobile .text-area p.sentence-item {
-  font-size: 0.95rem; /* 字体调小 (原1.1rem) */
+  font-size: 0.95rem; 
   line-height: 1.6;
-  margin: 4px 0; /* 减小段落间距 */
+  margin: 4px 0; 
 }
 
 /* --- 设备选择遮罩样式 --- */
