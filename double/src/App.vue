@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue' 
 // 👇 请确保路径正确
 import FireworksPage from './compoents/FireworksPage.vue'
+
+// --- 0. 预加载状态 ---
+const isLoading = ref(true)
+const loadProgress = ref(0) // 加载进度 0-100
 
 // --- 1. 数据配置区 ---
 const slides = [
@@ -30,32 +34,28 @@ const slides = [
     type: 'content',
     image: '/photos/0929-2.jpg',
     date: '2025.09.29 7:00 - 📲 谢谢你，没听我的话',
-    text: '那时的我，别扭又忐忑，发完那一大段真心话就‘怂’了，特意补了一句‘别回我’。其实潜台词是——‘我很怕你真的不回’。无论出于何种原因，你总是会回。或许这就是我们要在一起的注定吧：我试图用‘别回我’来给自己留退路，而你用一句‘晚点回你’，堵住了我所有的胡思乱想，重新为我铺了一条走向你的路。\n你知道吗？看到你说‘没有对不起’，说那是一段‘纯真的画卷’时，我心里那块压了多年的石头终于落地了。谢谢你，没有听我的话；谢谢你，愿意接住那个笨拙的我，把我的‘遗憾’变成了我们共同的‘美好’。'
-    ,
+    text: '那时的我，别扭又忐忑，发完那一大段真心话就‘怂’了，特意补了一句‘别回我’。其实潜台词是——‘我很怕你真的不回’。无论出于何种原因，你总是会回。或许这就是我们要在一起的注定吧：我试图用‘别回我’来给自己留退路，而你用一句‘晚点回你’，堵住了我所有的胡思乱想，重新为我铺了一条走向你的路。\n你知道吗？看到你说‘没有对不起’，说那是一段‘纯真的画卷’时，我心里那块压了多年的石头终于落地了。谢谢你，没有听我的话；谢谢你，愿意接住那个笨拙的我，把我的‘遗憾’变成了我们共同的‘美好’。',
     backgroundType: 'image', 
     backgroundImage: '/photos/3.jpg', 
   },
-
-{
+  {
     type: 'content',
-    // ⚠️ 注意这里把 image 改成了 images 数组
+    // 拼贴照片组
     images: [
-      '/photos/b1.jpeg', // 替换成你的照片路径1
-      '/photos/b2.JPG', // 替换成你的照片路径2
+      '/photos/b1.jpeg', 
+      '/photos/b2.JPG', 
       '/photos/b4.png'
     ],
     date: '2025.10.01 - 2025.10.05 - 🌧️ 慕尼黑的雨，与消失的三天',
-    text: '刚刚搬家就和房东闹得一地鸡毛，让我在慕尼黑差点崩溃。有几天，我选择了‘消失’。不是不想找你，而是不敢。我看着满屋的狼藉，心里只有一个念头：‘隔着几千公里，你凭什么要在乎这么狼狈的我？’ 我怕我的负能量会把你吓跑，所以我想一个人扛。那时候的我还不懂，以为爱是只分享光鲜。但其实爱，是敢于把那个破碎的、狼狈的自己也拼凑进来，让你拥有一个完整的我。以后在你面前，笑的那个人是我，哭的那个人，同样也是我。'
-    ,
+    text: '刚刚搬家就和房东闹得一地鸡毛，让我在慕尼黑差点崩溃。有几天，我选择了‘消失’。不是不想找你，而是不敢。我看着满屋的狼藉，心里只有一个念头：‘隔着几千公里，你凭什么要在乎这么狼狈的我？’ 我怕我的负能量会把你吓跑，所以我想一个人扛。那时候的我还不懂，以为爱是只分享光鲜。但其实爱，是敢于把那个破碎的、狼狈的自己也拼凑进来，让你拥有一个完整的我。以后在你面前，笑的那个人是我，哭的那个人，同样也是我。',
     backgroundType: 'image',
-    backgroundImage: '/photos/4.webp', // 这里背景图我先没动，你也可以改
+    backgroundImage: '/photos/4.webp', 
   },
   {
     type: 'content',
     image: '/photos/c1.png',
     date: '2025.10.04 ',
-    text: '搬入新家那天，感觉又被治愈了，说来又是幸运的一次。我迫不及待地拍了这个视频发给你，虽然名字叫‘脱离苦海’，但心里想的其实是‘想和你分享这份安稳’。现在回看，让我感慨和触动的不是当时有多幸运找到这样一个房子，而是你说‘和朋友在一起，视频看了一半’。最后又补了一句‘看完了’。即使在你热闹的生活里，你也愿意留出7分30秒的时间。'
-    ,
+    text: '搬入新家那天，感觉又被治愈了，说来又是幸运的一次。我迫不及待地拍了这个视频发给你，虽然名字叫‘脱离苦海’，但心里想的其实是‘想和你分享这份安稳’。现在回看，让我感慨和触动的不是当时有多幸运找到这样一个房子，而是你说‘和朋友在一起，视频看了一半’。最后又补了一句‘看完了’。即使在你热闹的生活里，你也愿意留出7分30秒的时间。',
     backgroundType: 'image', 
     backgroundImage: '/photos/c2.jpg', 
   },
@@ -131,6 +131,9 @@ watch(currentIndex, () => {
 
 // 核心翻页交互逻辑
 const nextSlide = () => {
+  // 0. 如果还在加载中，禁止任何操作
+  if (isLoading.value) return
+
   // ⭐⭐⭐ 修复点：如果已经是烟花页，不再执行任何翻页/音乐逻辑，避免重复加载音乐 ⭐⭐⭐
   if (showFireworksPage.value) {
     return
@@ -180,11 +183,72 @@ const nextSlide = () => {
     }, 500) 
   }
 }
+
+// --- ⭐⭐⭐ 新增：图片预加载系统 ⭐⭐⭐ ---
+const preloadImages = async () => {
+  // 1. 提取所有需要加载的图片 URL
+  const imageUrls: string[] = []
+  
+  slides.forEach(slide => {
+    if (slide.image) imageUrls.push(slide.image)
+    if (slide.backgroundImage) imageUrls.push(slide.backgroundImage)
+    if (slide.images && slide.images.length > 0) {
+      imageUrls.push(...slide.images)
+    }
+  })
+
+  // 去重
+  const uniqueUrls = [...new Set(imageUrls)]
+  let loadedCount = 0
+
+  // 2. 并行加载函数
+  const loadSingleImage = (url: string) => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.src = url
+      // 关键：图片解码完成后再 resolve，防止切页卡顿
+      img.onload = () => {
+        loadedCount++
+        loadProgress.value = Math.floor((loadedCount / uniqueUrls.length) * 100)
+        resolve(true)
+      }
+      img.onerror = () => {
+        // 即使失败也要 resolve，防止卡死在 Loading 界面
+        console.error(`Failed to load: ${url}`)
+        loadedCount++
+        loadProgress.value = Math.floor((loadedCount / uniqueUrls.length) * 100)
+        resolve(false)
+      }
+    })
+  }
+
+  // 3. 开始加载
+  await Promise.all(uniqueUrls.map(url => loadSingleImage(url)))
+  
+  // 4. 加载完毕，为了体验稍微延迟一下消失
+  setTimeout(() => {
+    isLoading.value = false
+  }, 500)
+}
+
+// 在组件挂载时启动预加载
+onMounted(() => {
+  preloadImages()
+})
 </script>
 
 <template>
   <div class="app-container" @click="nextSlide">
     
+    <transition name="fade">
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>正在整理回忆... {{ loadProgress }}%</p>
+        </div>
+      </div>
+    </transition>
+
     <audio ref="audioRef" loop src="/music/伴奏.mp3"></audio>
 
     <div class="music-btn" @click.stop="toggleMusic" :class="{ 'playing': isMusicPlaying }">
@@ -217,15 +281,16 @@ const nextSlide = () => {
           </div>
         </div>
 
-<div
-          v-else-if="currentSlide.type === 'content'"
-          class="slide-section content"
+        <div 
+          v-else-if="currentSlide.type === 'content'" 
+          class="slide-section content" 
           :key="currentIndex"
           :style="currentSlide.backgroundType === 'image' ? { backgroundImage: `url(${currentSlide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}"
         >
-          <div v-if="currentSlide.backgroundType === 'image'" class="background-overlay"></div>
+          <div v-if="currentSlide.backgroundType === 'image'" class="background-overlay"></div> 
 
           <div class="content-main">
+            
             <div v-if="currentSlide.images && currentSlide.images.length > 0" class="photo-collage">
               <div
                 v-for="(imgSrc, index) in currentSlide.images"
@@ -240,11 +305,11 @@ const nextSlide = () => {
             <div v-else class="polaroid">
               <img :src="currentSlide.image" alt="Memory" />
             </div>
-
+            
             <div class="text-area">
               <span class="date-tag">{{ currentSlide.date }}</span>
-              <p
-                v-for="(sentence, index) in visibleSentences"
+              <p 
+                v-for="(sentence, index) in visibleSentences" 
                 :key="index"
                 class="sentence-item"
               >
@@ -455,7 +520,7 @@ body, html {
   overflow: visible !important; 
 }
 
-/* 左侧拍立得 */
+/* 左侧拍立得 (单张) */
 .polaroid {
   flex-shrink: 0; 
   width: 450px;  
@@ -463,14 +528,11 @@ body, html {
   padding: 15px 15px 60px 15px;
   box-shadow: 0 25px 50px rgba(0,0,0,0.2), 
               0 0 0 2px rgba(0,0,0,0.02) inset; 
-  
   margin-left: -140px; 
   margin-top: -60px; 
   margin-bottom: -60px; 
-
   transform: rotate(-5deg); 
   z-index: 10; 
-  
   border-radius: 4px; 
   transition: transform 0.3s;
 }
@@ -611,6 +673,7 @@ body, html {
 .fade-enter-from { opacity: 0; transform: translateY(20px); }
 .fade-leave-to { opacity: 0; transform: translateY(-20px); }
 @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
 /* --- 照片拼贴容器 (四角分散版) --- */
 .photo-collage {
   flex-shrink: 0;
@@ -651,7 +714,7 @@ body, html {
 
 /* --- 四张照片的具体布局 (田字格分布) --- */
 
-/* 1. 左上 (比如：行李箱) */
+/* 1. 左上 */
 .collage-1 {
   width: 210px;
   top: 10px;
@@ -660,7 +723,7 @@ body, html {
   z-index: 11;
 }
 
-/* 2. 右上 (比如：聊天记录) */
+/* 2. 右上 */
 .collage-2 {
   width: 200px;
   top: 30px;
@@ -669,7 +732,7 @@ body, html {
   z-index: 12;
 }
 
-/* 3. 左下 (比如：路边风景) */
+/* 3. 左下 */
 .collage-3 {
   width: 210px;
   bottom: 20px;
@@ -678,7 +741,7 @@ body, html {
   z-index: 13;
 }
 
-/* 4. 右下 (比如：其他生活照) */
+/* 4. 右下 */
 .collage-4 {
   width: 200px;
   bottom: 10px;
@@ -708,5 +771,41 @@ body, html {
   .collage-2 { top: 10px; right: 0; transform: rotate(4deg); }
   .collage-3 { bottom: 10px; left: 5px; transform: rotate(3deg); }
   .collage-4 { bottom: 0; right: 5px; transform: rotate(-3deg); }
+}
+
+/* --- Loading 样式 --- */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #fdfcf8;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.loading-content {
+  text-align: center;
+  color: var(--primary);
+}
+.loading-content p {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(228, 177, 171, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin-loading 1s ease-in-out infinite;
+  margin: 0 auto;
+}
+@keyframes spin-loading {
+  to { transform: rotate(360deg); }
 }
 </style>
