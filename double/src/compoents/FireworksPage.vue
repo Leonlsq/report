@@ -1,18 +1,31 @@
 <template>
-  <div class="cinema-container">
+  <div class="cinema-container" @click="startShow">
     <canvas ref="canvasRef"></canvas>
     
-    <div class="overlay-content">
-      <div class="text-wrapper">
-        <h1 class="title handwritten-title">Happy Birthday, My Love</h1>
-        <p class="subtitle">愿我们的爱，如这漫天烟火，绚烂且长明。</p>
-        <p class="date">2025.11.28</p> 
+    <transition name="fade">
+      <div v-if="!hasStarted" class="intro-overlay">
+        <div class="intro-text-wrapper">
+          <p class="intro-text">亲爱的 Ty</p>
+          <p class="intro-sub-text">轻触屏幕，点亮属于你的星河</p>
         </div>
-    </div>
+      </div>
+    </transition>
 
-    <div class="bottom-text-overlay">
-      <p class="new-chinese-text">相遇已是上上签，再相遇便是一辈子。</p>
-    </div>
+    <transition name="fade-slow">
+      <div v-if="hasStarted" class="overlay-content">
+        <div class="text-wrapper">
+          <h1 class="title handwritten-title">Happy Birthday, My Lovely Ty</h1>
+          <p class="subtitle">愿我们的爱，如这漫天烟火，绚烂且长明。</p>
+          <p class="date">2025.11.28</p> 
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade-slow">
+      <div v-if="hasStarted" class="bottom-text-overlay">
+        <p class="new-chinese-text">相遇已是上上签，再相遇便是一辈子。</p>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -25,6 +38,16 @@ let ctx: CanvasRenderingContext2D | null = null;
 let width = 0;
 let height = 0;
 let animationId: number;
+
+// ⭐ 新增状态：是否开始演示
+const hasStarted = ref(false);
+
+// ⭐ 交互逻辑：点击屏幕开始
+const startShow = () => {
+  if (!hasStarted.value) {
+    hasStarted.value = true;
+  }
+};
 
 // --- 配置参数 ---
 const CONFIG = {
@@ -170,22 +193,17 @@ function drawBackground() {
   ctx.globalAlpha = 1;
 }
 
-// ⭐⭐⭐ 核心修改：重塑人物结构 ⭐⭐⭐
 function drawCouple() {
   if (!ctx) return;
 
   const centerX = width / 2;
   const bottomY = height;
-  
-  // ⭐⭐⭐ 修改点：放大比例 ⭐⭐⭐
-  // 从 0.00042 改为 0.0008，让人物占据画面约 1/3 到 1/2 的高度
   const scale = Math.min(width, height) * 0.0008;
 
   ctx.save();
   ctx.translate(centerX, bottomY);
   ctx.scale(scale, scale);
 
-  // --- 依然使用那个唯美的渐变 ---
   const gradient = ctx.createRadialGradient(
     0, -450, 30,
     0, -300, 600
@@ -195,108 +213,49 @@ function drawCouple() {
   gradient.addColorStop(1, "rgba(5, 5, 10, 0.9)");
 
   ctx.fillStyle = gradient;
-  
-  // 高光描边设置
   ctx.strokeStyle = "rgba(255, 230, 200, 0.5)";
   ctx.lineWidth = 6;
   ctx.lineJoin = "round";
 
-  // ==========================================
-  // 1. 绘制男生 (左边，稍微大一点)
-  // ==========================================
+  // 男生
   const boy = new Path2D();
-  
-  // 男生身体：一个稳重的"面包"形状
   boy.moveTo(-130, 0); 
-  boy.quadraticCurveTo(-120, -350, -50, -350); // 左侧身体线
-  boy.lineTo(10, -350);                        // 肩膀是平的
-  boy.quadraticCurveTo(60, -350, 80, 0);       // 右侧身体线
+  boy.quadraticCurveTo(-120, -350, -50, -350); 
+  boy.lineTo(10, -350);                        
+  boy.quadraticCurveTo(60, -350, 80, 0);       
   boy.closePath();
-
-  // 男生头：正圆
-  boy.moveTo(-20 + 45, -420); // 移动笔触避免连线
+  boy.moveTo(-20 + 45, -420); 
   boy.arc(-20, -420, 55, 0, Math.PI * 2);
-
-  // 渲染男生
   ctx.fill(boy);
   ctx.stroke(boy);
 
-
-  // ==========================================
-  // 2. 绘制女生 (右边，稍微小一点，靠着男生)
-  // ==========================================
+  // 女生
   const girl = new Path2D();
-
-  // 女生身体：稍微瘦一点的"面包"
   girl.moveTo(60, 0);
-  // 注意：这里的控制点让身体向左倾斜一点，制造"依偎"感
-  girl.quadraticCurveTo(50, -300, 80, -320);  // 左肩位置
-  girl.lineTo(120, -320);                     // 肩膀
-  girl.quadraticCurveTo(160, -280, 150, 0);   // 右侧
+  girl.quadraticCurveTo(50, -300, 80, -320);  
+  girl.lineTo(120, -320);                     
+  girl.quadraticCurveTo(160, -280, 150, 0);   
   girl.closePath();
-
-  // 女生头：正圆 (位置靠左，挨着男生的头)
   const gx = 90;
   const gy = -390;
   const gr = 50;
   girl.moveTo(gx + gr, gy);
   girl.arc(gx, gy, gr, 0, Math.PI * 2);
-
-  // 女生发型特征：丸子头 (Bun) 
   girl.moveTo(gx + 35 + 20, gy - 35); 
   girl.arc(gx + 35, gy - 35, 20, 0, Math.PI * 2);
-
-  // 渲染女生
-  // 这里的 fill 会覆盖掉男生重叠的部分，看起来更有层次
   ctx.fill(girl);
   ctx.stroke(girl);
 
-  // ==========================================
-  // 3. 增加一点"卡通感"的小细节
-  // ==========================================
-  
-  // 在两个头中间画一个小爱心
+  // 爱心
   ctx.fillStyle = "rgba(255, 200, 200, 0.8)";
   const heart = new Path2D();
   const hx = 35, hy = -500;
-  // 简易爱心路径
   heart.moveTo(hx, hy);
   heart.bezierCurveTo(hx - 20, hy - 20, hx - 20, hy + 10, hx, hy + 25);
   heart.bezierCurveTo(hx + 20, hy + 10, hx + 20, hy - 20, hx, hy);
   ctx.fill(heart);
 
   ctx.restore();
-}
-
-// 辅助函数：绘制星星 (Q版细节常用的几何图形)
-function drawStar(
-  ctx: CanvasRenderingContext2D,  // 显式指定类型
-  cx: number,                      // 显式指定类型
-  cy: number,                      // 显式指定类型
-  spikes: number,                  // 显式指定类型
-  outerRadius: number,             // 显式指定类型
-  innerRadius: number              // 显式指定类型
-): void {
-  let rot = Math.PI / 2 * 3;
-  let x = cx;
-  let y = cy;
-  let step = Math.PI / spikes;
-
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - outerRadius);
-  for (let i = 0; i < spikes; i++) {
-    x = cx + Math.cos(rot) * outerRadius;
-    y = cy + Math.sin(rot) * outerRadius;
-    ctx.lineTo(x, y);
-    rot += step;
-
-    x = cx + Math.cos(rot) * innerRadius;
-    y = cy + Math.sin(rot) * innerRadius;
-    ctx.lineTo(x, y);
-    rot += step;
-  }
-  ctx.closePath();
-  ctx.fill();
 }
 
 function drawReflection() {
@@ -334,11 +293,14 @@ function loop() {
   ctx.globalCompositeOperation = 'source-over';
   drawBackground();
 
-  if (Math.random() < 0.03) { 
-    const startX = Math.random() * (width * 0.8) + width * 0.1;
-    const targetX = Math.random() * (width * 0.6) + width * 0.2;
-    const targetY = Math.random() * (height * 0.5); 
-    fireworks.push(new Firework(startX, height, targetX, targetY));
+  // ⭐⭐⭐ 核心修改：只有开始后才生成烟花 ⭐⭐⭐
+  if (hasStarted.value) {
+    if (Math.random() < 0.03) { 
+      const startX = Math.random() * (width * 0.8) + width * 0.1;
+      const targetX = Math.random() * (width * 0.6) + width * 0.2;
+      const targetY = Math.random() * (height * 0.5); 
+      fireworks.push(new Firework(startX, height, targetX, targetY));
+    }
   }
 
   let i = fireworks.length;
@@ -398,9 +360,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ⚠️ @import 必须放在 CSS 的第一行才能生效 */
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+/* 新增：引入思源宋体 Web Font 链接 (可选，或者使用系统宋体) */
 
 .cinema-container {
   position: fixed;
@@ -411,12 +373,50 @@ onUnmounted(() => {
   background: #000;
   overflow: hidden;
   z-index: 9999;
+  cursor: pointer; /* 增加手型图标提示可点击 */
 }
 
 canvas {
   display: block;
 }
 
+/* --- 提示语样式 (Intro) --- */
+.intro-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10002;
+  pointer-events: none; /* 透传点击事件 */
+}
+
+.intro-text-wrapper {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  animation: fadeInPulse 3s ease-in-out infinite;
+}
+
+.intro-text {
+  font-family: "Songti SC", "SimSun", serif;
+  font-size: 2rem;
+  letter-spacing: 5px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.intro-sub-text {
+  font-family: "PingFang SC", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 300;
+  opacity: 0.8;
+  letter-spacing: 2px;
+}
+
+/* --- 生日祝福内容 --- */
 .overlay-content {
   position: absolute;
   top: 0;
@@ -435,7 +435,8 @@ canvas {
   text-align: center;
   color: white;
   opacity: 0;
-  animation: fadeUpIn 3s ease-out 2s forwards; 
+  /* 修改：延迟出现，给烟花一点时间 */
+  animation: fadeUpIn 2s ease-out 0.5s forwards; 
 }
 
 .title {
@@ -448,16 +449,14 @@ canvas {
   opacity: 1; 
 }
 
-/* --- ⭐ 修改点：光标动画 ⭐ --- */
 .handwritten-title {
   font-family: 'Dancing Script', cursive; 
   overflow: hidden; 
   white-space: nowrap; 
   border-right: 0.15em solid orange; 
+  /* 调整打字机动画，确保只在显示后执行 */
   animation: 
-    typing 4s steps(22, end) 5s forwards, 
-    /* 修改这里：由 infinite 改为 13 forwards */
-    /* 逻辑：闪烁 13 次 (约9.75秒) 后停止，forwards 保持最后一帧(透明)，从而实现消失 */
+    typing 4s steps(22, end) 1s forwards, 
     blink-caret 0.75s step-end 13 forwards;
   width: 0; 
   text-shadow: 0 0 25px rgba(255, 240, 180, 0.7), 0 0 5px rgba(255, 240, 180, 0.5); 
@@ -490,30 +489,24 @@ canvas {
   text-align: center;
   z-index: 10001;
   opacity: 0;
-  animation: fadeUpIn 3s ease-out 3s forwards; 
+  animation: fadeUpIn 2s ease-out 1.5s forwards; 
 }
 
 .new-chinese-text {
-  /* ⭐ 优先使用衬线体：思源宋体 / 标准宋体 ⭐ */
   font-family: "Noto Serif SC", "Songti SC", "SimSun", "Times New Roman", serif;
-  
   font-size: clamp(1.2rem, 3vw, 2rem); 
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 600; /* 宋体横细竖粗，稍微加粗一点在黑色背景上更清晰 */
-  letter-spacing: 10px; /* 宋体拉大间距非常有电影感 */
+  font-weight: 600; 
+  letter-spacing: 10px; 
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   margin: 0;
 }
 
+/* --- 动画定义 --- */
+
 @keyframes fadeUpIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes typing {
@@ -524,5 +517,29 @@ canvas {
 @keyframes blink-caret {
   from, to { border-color: transparent }
   50% { border-color: orange; }
+}
+
+/* 呼吸灯效果 */
+@keyframes fadeInPulse {
+  0% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
+
+/* Vue Transition 样式 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-slow-enter-active {
+  transition: opacity 2s ease;
+}
+.fade-slow-enter-from {
+  opacity: 0;
 }
 </style>

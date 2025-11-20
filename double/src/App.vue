@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-// 👇 请确保路径正确，如果报错找不到组件，请检查这里
+// 👇 请确保路径正确
 import FireworksPage from './compoents/FireworksPage.vue'
 
 // --- 1. 数据配置区 ---
@@ -12,13 +12,11 @@ const slides = [
   },
   {
     type: 'content', 
-    image: '/photos/0927.jpg', // 这是左边拍立得显示的图片
+    image: '/photos/0927.jpg', 
     date: '2025.09.27',
     text: '重逢的开始，没有惊天动地的对白，只有一句‘你吃过这个吗’。就因为那个关于‘面包机’的如常对话，两个人原本平行的生活线，好像开始了倾斜。谁能想到，超市角落里那台普普通通的切面包机，竟然切开了我原本平淡生活的缺口，让你走了进来。好幸运。还要感谢这个面包机，哈哈哈。',
-    
-    // 👇这一页的特殊配置：背景图 + 虚化
     backgroundType: 'image', 
-    backgroundImage: '/photos/1.jpg', // 这是背景大图
+    backgroundImage: '/photos/1.jpg', 
   },
   {
     type: 'content',
@@ -49,10 +47,7 @@ const cursorVisible = ref(true)
 const showFireworksPage = ref(false)
 const audioRef = ref<HTMLAudioElement | null>(null)
 const isMusicPlaying = ref(false)
-// ⭐ 新增状态：追踪封面页打字是否完成
 const isTypingFinished = ref(false) 
-
-// 控制内容页显示到第几句话
 const contentStep = ref(1)
 
 const currentSlide = computed(() => slides[currentIndex.value])
@@ -61,11 +56,9 @@ const currentSlide = computed(() => slides[currentIndex.value])
 const currentSlideSentences = computed(() => {
   const slide = currentSlide.value
   if (slide.type !== 'content' || !slide.text) return []
-  // 将句号替换为 "句号+分隔符"，然后拆分，去除空项
   return slide.text.replace(/。/g, '。|').split('|').map(s => s.trim()).filter(s => s)
 })
 
-// 🛠️ 计算当前应该显示的句子列表
 const visibleSentences = computed(() => {
   return currentSlideSentences.value.slice(0, contentStep.value)
 })
@@ -82,7 +75,6 @@ const toggleMusic = () => {
 // 打字机效果
 let typeInterval: number | null = null
 const typewriterEffect = (text: string, delay = 100) => {
-  // ⭐ 每次开始打字时，设置为 false
   isTypingFinished.value = false 
   displayedText.value = ''
   cursorVisible.value = true
@@ -95,13 +87,12 @@ const typewriterEffect = (text: string, delay = 100) => {
     } else {
       if (typeInterval) clearInterval(typeInterval)
       cursorVisible.value = false 
-      // ⭐ 打字完成时，设置为 true
       isTypingFinished.value = true
     }
   }, delay)
 }
 
-// 监听翻页，重置状态
+// 监听翻页
 watch(currentIndex, () => {
   contentStep.value = 1 
   if (currentSlide.value.type === 'cover' && currentSlide.value.printText) {
@@ -111,20 +102,24 @@ watch(currentIndex, () => {
 
 // 核心翻页交互逻辑
 const nextSlide = () => {
-  // ⭐ 核心修改: 如果当前是封面页且打字未完成，则执行 return，阻止所有操作
+  // ⭐⭐⭐ 修复点：如果已经是烟花页，不再执行任何翻页/音乐逻辑，避免重复加载音乐 ⭐⭐⭐
+  if (showFireworksPage.value) {
+    return
+  }
+
+  // 1. 封面打字未完成，禁止操作
   if (currentSlide.value.type === 'cover' && !isTypingFinished.value) {
-    // 仅仅阻止，不提前结束打字机效果
     return 
   }
 
-  // 播放音乐逻辑 (保持不变)
-  if (audioRef.value && audioRef.value.paused && !isMusicPlaying.value) {
+  // 2. 播放音乐逻辑 (如果没在播放，且不是最后一步，则尝试播放默认BGM)
+  if (audioRef.value && audioRef.value.paused && !isMusicPlaying.value && currentIndex.value < slides.length - 1) {
     audioRef.value.play()
       .then(() => { isMusicPlaying.value = true })
       .catch((e) => console.log('等待交互播放', e))
   }
 
-  // 内容页点击逻辑 (显示下一句话)
+  // 3. 内容页逐句显示逻辑
   if (currentSlide.value.type === 'content') {
     if (contentStep.value < currentSlideSentences.value.length) {
       contentStep.value++
@@ -132,10 +127,23 @@ const nextSlide = () => {
     }
   }
 
-  // 翻页和结束逻辑
+  // 4. 翻页和结束逻辑
   if (currentIndex.value === slides.length - 1) {
+    // 在点击领取礼物时，强制切歌
+    if (audioRef.value) {
+      audioRef.value.pause()
+      audioRef.value.src = '/music/你是我的风景.mp3'
+      audioRef.value.load()
+      audioRef.value.play()
+        .then(() => { isMusicPlaying.value = true })
+        .catch((e) => console.error('切歌失败', e))
+    }
+    
+    // 显示烟花页
     showFireworksPage.value = true
+
   } else if (currentIndex.value < slides.length - 1) {
+    // 普通翻页动画
     isAnimate.value = true
     setTimeout(() => {
       currentIndex.value++
@@ -148,7 +156,7 @@ const nextSlide = () => {
 <template>
   <div class="app-container" @click="nextSlide">
     
-    <audio ref="audioRef" loop src="/music/你是我的风景.mp3"></audio>
+    <audio ref="audioRef" loop src="/music/伴奏.mp3"></audio>
 
     <div class="music-btn" @click.stop="toggleMusic" :class="{ 'playing': isMusicPlaying }">
       <div class="music-icon" :class="{ 'spinning': isMusicPlaying }">
@@ -369,7 +377,7 @@ body, html {
   text-align: center;
 }
 
-/* --- Content 页布局 (核心修改区) --- */
+/* --- Content 页布局 --- */
 .slide-section.content {
   display: flex; 
   align-items: center; 
@@ -388,7 +396,7 @@ body, html {
   z-index: 1; 
 }
 
-/* 内容主容器 - 调整了上下 padding */
+/* 内容主容器 */
 .content-main {
   display: flex; 
   flex-direction: row; 
@@ -401,14 +409,13 @@ body, html {
   position: relative; 
   background: rgba(255, 255, 255, 0.6); 
   border-radius: 20px;
-  /* 关键修改：进一步缩减垂直 padding，实现长方形效果 */
   padding: 15px 40px; 
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   backdrop-filter: blur(5px); 
   overflow: visible !important; 
 }
 
-/* 左侧拍立得 (破框核心代码) */
+/* 左侧拍立得 */
 .polaroid {
   flex-shrink: 0; 
   width: 450px;  
@@ -417,7 +424,6 @@ body, html {
   box-shadow: 0 25px 50px rgba(0,0,0,0.2), 
               0 0 0 2px rgba(0,0,0,0.02) inset; 
   
-  /* 负 margin 保持破框效果，使其垂直方向上与新的短框体匹配 */
   margin-left: -140px; 
   margin-top: -60px; 
   margin-bottom: -60px; 
@@ -464,8 +470,7 @@ body, html {
   100% { opacity: 1; transform: translateY(0); }
 }
 .text-area p.sentence-item {
-  /* 关键修改：缩减文字段落的上下 margin */
-  margin: 8px 0; /* 原始是 12px 0 */
+  margin: 8px 0;
   color: var(--text-main);
   line-height: 1.8;
   white-space: pre-line;
@@ -474,7 +479,7 @@ body, html {
   animation: soft-float-up 4.0s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* --- 📱 移动端适配 (手机上不破框，恢复正常布局) --- */
+/* --- 📱 移动端适配 --- */
 @media (max-width: 768px) {
   .content-main {
     flex-direction: column;
