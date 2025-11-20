@@ -425,106 +425,120 @@ body, html {
   transform: scale(0.85); 
   width: 95%;
 }
-/* --- 📱 Mobile (Phone) 深度适配优化 (最终修正版) --- */
+/* --- 📱 Mobile (Phone) 终极居中修正版 --- */
+
+/* 1. 外层白色卡片容器 */
 .app-container.mode-mobile .content-main {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center; /* 强制内部元素居中 */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important; /* 强制子元素水平居中 */
+  justify-content: flex-start !important;
   
-  /* 尺寸和定位修正 */
-  width: 85% !important; /* 稍微变窄一点，留出两边空隙 */
-  max-width: 400px;
-  height: auto;
-  max-height: 80vh;
+  /* 宽度控制：使用视窗宽度的 85%，并限制最大宽度 */
+  width: 85vw !important; 
+  max-width: 380px !important;
   
-  padding: 30px 20px; /* 增加内部间距 */
-  
-  /* ⭐⭐⭐ 核心修复：强制居中，清除所有可能的偏移 ⭐⭐⭐ */
+  /* 强制居中：上下20px，左右自动 */
   margin: 20px auto !important; 
+  
+  /* 清除桌面端的定位干扰 */
   left: auto !important;
   right: auto !important;
   transform: none !important;
   
+  padding: 30px 20px !important;
   gap: 20px;
   
+  box-sizing: border-box !important;
+  
+  /* 滚动支持 */
   overflow-y: auto !important; 
+  overflow-x: hidden !important; /* 禁止横向滚动 */
   -webkit-overflow-scrolling: touch;
-  box-sizing: border-box;
 }
 
-/* 1. 修复单张拍立得 (强制清除桌面端的负边距) */
+/* 2. 单张拍立得图片修正 */
 .app-container.mode-mobile .polaroid {
-  width: 200px; 
-  padding: 10px 10px 35px 10px; 
+  /* 强制清除所有外边距 */
+  margin: 0 !important; 
   
-  /* ⭐⭐⭐ 核心修复：margin 归零并自动居中 ⭐⭐⭐ */
-  margin-left: 0 !important; 
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  margin: 0 auto !important; 
+  width: 200px !important;
+  padding: 10px 10px 35px 10px !important;
   
-  transform: rotate(-2deg); 
-  flex-shrink: 0; 
-  position: relative;
-  left: auto;
-  top: auto;
+  /* 确保自身居中 */
+  align-self: center !important;
+  
+  /* 保持轻微旋转，但清除位移 */
+  transform: rotate(-2deg) !important;
+  
+  /* 清除定位 */
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  flex-shrink: 0 !important;
 }
 
-/* 2. 修复拼贴画容器 */
+/* 3. 拼贴画容器修正 */
 .app-container.mode-mobile .photo-collage {
-  width: 260px;
-  height: 240px;
+  /* 强制清除所有外边距 */
+  margin: 0 !important;
   
-  /* ⭐⭐⭐ 核心修复：清除偏移 ⭐⭐⭐ */
-  margin-left: 0 !important; 
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  margin: 0 auto !important; 
+  width: 260px !important;
+  height: 230px !important;
   
-  transform: scale(0.95); 
-  left: auto;
-  top: auto;
+  /* 确保自身居中 */
+  align-self: center !important;
+  
+  /* 缩放必须以中心为原点，否则会歪 */
+  transform-origin: center center !important;
+  transform: scale(0.95) !important;
+  
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  flex-shrink: 0 !important;
 }
 
-/* 调整拼贴画内部图片大小 */
+/* 拼贴画内部微调 (保持原样) */
 .app-container.mode-mobile .collage-1, 
 .app-container.mode-mobile .collage-2, 
 .app-container.mode-mobile .collage-3, 
 .app-container.mode-mobile .collage-4 {
-  width: 120px; 
+  width: 120px !important; 
 }
-/* 稍微修正拼贴画在手机上的旋转角度，防止太占宽 */
-.app-container.mode-mobile .collage-1 { left: 10px; }
-.app-container.mode-mobile .collage-2 { right: 10px; }
-.app-container.mode-mobile .collage-3 { left: 20px; }
-.app-container.mode-mobile .collage-4 { right: 20px; }
+.app-container.mode-mobile .collage-1 { left: 10px !important; top: 0 !important; }
+.app-container.mode-mobile .collage-2 { right: 10px !important; top: 10px !important; }
+.app-container.mode-mobile .collage-3 { left: 20px !important; bottom: 10px !important; }
+.app-container.mode-mobile .collage-4 { right: 20px !important; bottom: 0 !important; }
 
-
-/* 3. 文字区域居中 */
+/* 4. 文字区域修正 */
 .app-container.mode-mobile .text-area {
-  text-align: center; 
-  width: 100%;
-  padding-left: 0 !important; /* 清除桌面端的左内边距 */
-  padding-bottom: 40px; /* 底部留白，方便滚动 */
+  width: 100% !important;
+  text-align: center !important;
+  padding: 0 !important; /* 彻底清除内边距 */
+  margin: 0 !important;  /* 彻底清除外边距 */
 }
 
 .app-container.mode-mobile .slide-title {
-  font-size: 1.3rem;
-  margin-bottom: 10px;
-  text-align: center;
+  font-size: 1.25rem !important;
+  margin: 5px 0 10px 0 !important;
+  text-align: center !important;
+  display: block !important;
+  width: 100% !important;
 }
 
 .app-container.mode-mobile .date-tag {
-  font-size: 0.85rem;
-  padding: 4px 14px;
-  margin-bottom: 15px;
+  font-size: 0.85rem !important;
+  padding: 4px 14px !important;
+  margin: 0 auto 15px auto !important; /* 强制标签居中 */
+  display: inline-block !important;
 }
 
 .app-container.mode-mobile .text-area p.sentence-item {
-  font-size: 1rem; 
-  line-height: 1.7;
-  margin: 6px 0; 
+  font-size: 1rem !important;
+  line-height: 1.7 !important;
+  margin: 6px 0 !important;
+  text-align: center !important; /* 强制文字居中 */
 }
 /* --- 设备选择遮罩样式 --- */
 .device-selector-overlay {
