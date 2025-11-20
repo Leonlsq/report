@@ -48,13 +48,13 @@
         <div class="keypad">
           <div class="key-row" v-for="(row, rowIndex) in keys" :key="rowIndex">
             <button 
-              v-for="key in row" 
-              :key="key.value" 
+              v-for="(key, kIndex) in row" 
+              :key="kIndex" 
               class="key-btn" 
               :class="{ 'empty-key': !key.value && key.value !== 0 && key.action !== 'delete' }"
               @click.stop="handleKeyClick(key)"
             >
-              <span class="key-num" v-if="key.value !== undefined">{{ key.value }}</span>
+              <span class="key-num" v-if="key.value !== undefined && key.value !== null">{{ key.value }}</span>
               <span class="key-letters" v-if="key.letters">{{ key.letters }}</span>
               <span v-if="key.action === 'delete'" class="delete-icon">
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
@@ -86,7 +86,10 @@ const isError = ref(false)
 
 // 时间日期相关
 const now = ref(new Date())
-let timer: number
+
+// ⭐ 修复点1：类型定义为 any，避免 build 时环境差异导致的类型报错
+let timer: any = null
+
 const currentTime = computed(() => {
   return now.value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
 })
@@ -99,7 +102,7 @@ onMounted(() => {
   timer = setInterval(() => { now.value = new Date() }, 1000)
 })
 onUnmounted(() => {
-  clearInterval(timer)
+  if (timer) clearInterval(timer)
 })
 
 // 点击屏幕显示密码界面
@@ -109,22 +112,31 @@ const handleContainerClick = () => {
   }
 }
 
-// 键盘配置
-const keys = [
+// ⭐ 修复点2：定义接口，解决 implicitly has an 'any' type 错误
+interface KeyItem {
+  value?: number | null;
+  letters?: string;
+  action?: string;
+}
+
+// 键盘配置 (应用接口)
+const keys: KeyItem[][] = [
   [{ value: 1, letters: '' }, { value: 2, letters: 'ABC' }, { value: 3, letters: 'DEF' }],
   [{ value: 4, letters: 'GHI' }, { value: 5, letters: 'JKL' }, { value: 6, letters: 'MNO' }],
   [{ value: 7, letters: 'PQRS' }, { value: 8, letters: 'TUV' }, { value: 9, letters: 'WXYZ' }],
   [{ value: null }, { value: 0, letters: '' }, { action: 'delete' }]
 ]
 
-const handleKeyClick = (key: any) => {
+// ⭐ 修复点3：参数显式指定类型，且进行类型安全的字符串转换
+const handleKeyClick = (key: KeyItem) => {
   if (isError.value) return
 
   if (key.action === 'delete') {
     passcode.value = passcode.value.slice(0, -1)
   } else if (key.value !== undefined && key.value !== null) {
     if (passcode.value.length < 6) {
-      passcode.value += key.value
+      // 显式转为 String，防止 TS 报错
+      passcode.value += String(key.value)
       
       // 密码输满6位，校验
       if (passcode.value.length === 6) {
@@ -132,14 +144,14 @@ const handleKeyClick = (key: any) => {
           // 解锁成功
           setTimeout(() => {
             emit('unlocked')
-          }, 300) // 稍等一下让用户看到最后一个点变实
+          }, 300) 
         } else {
           // 解锁失败
           isError.value = true
           setTimeout(() => {
             passcode.value = ''
             isError.value = false
-          }, 500) // 抖动动画结束后重置
+          }, 500) 
         }
       }
     }
