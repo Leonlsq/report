@@ -38,6 +38,48 @@
       </div>
     </transition>
 
+    <transition name="fade-slide-left">
+      <div v-if="showRightClock" class="right-clock-container">
+        <p class="clock-label">距离下一次见面</p>
+        <p class="clock-date">(2026.02.26)</p>
+        
+        <div class="flip-clock">
+          <div class="flip-unit">
+            <div class="flip-card">
+              <transition name="flip" mode="out-in">
+                <span :key="timeLeft.days">{{ formatNum(timeLeft.days) }}</span>
+              </transition>
+            </div>
+            <span class="unit-label">DAYS</span>
+          </div>
+          <div class="flip-unit">
+            <div class="flip-card">
+              <transition name="flip" mode="out-in">
+                <span :key="timeLeft.hours">{{ formatNum(timeLeft.hours) }}</span>
+              </transition>
+            </div>
+            <span class="unit-label">HRS</span>
+          </div>
+          <div class="flip-unit">
+            <div class="flip-card">
+              <transition name="flip" mode="out-in">
+                <span :key="timeLeft.minutes">{{ formatNum(timeLeft.minutes) }}</span>
+              </transition>
+            </div>
+            <span class="unit-label">MIN</span>
+          </div>
+          <div class="flip-unit seconds-unit">
+            <div class="flip-card">
+              <transition name="flip" mode="out-in">
+                <span :key="timeLeft.seconds">{{ formatNum(timeLeft.seconds) }}</span>
+              </transition>
+            </div>
+            <span class="unit-label">SEC</span>
+          </div>
+        </div>
+      </div>
+    </transition>
+
   </div>
 </template>
 
@@ -59,65 +101,92 @@ const isRandomFireworksActive = ref(false);
 const showCenterTitle = ref(false);    
 const showFinalTextContainer = ref(false); 
 const showCenterSubtitle = ref(false); 
-const showBottomText = ref(false);     
+const showBottomText = ref(false);
+const showRightClock = ref(false); // 右侧时钟
 
 // 左侧打字机相关
 const displayedFinalText = ref(''); 
 const fullFinalText = "这场烟花不仅是我数十小时的工作，也是我们爱的见证。";
 const isFinalTextTyping = ref(false);
-const TYPE_SPEED = 160; // 打字速度
+const TYPE_SPEED = 250; 
 
-// --- ⭐ 动态时间轴控制中心 (优化版) ⭐ ---
+// 倒计时相关
+const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+let timer: any = null;
+const targetDate = new Date('2026-02-26T00:00:00');
+
+const updateCountdown = () => {
+  const current = new Date();
+  let diff = targetDate.getTime() - current.getTime();
+  if (diff < 0) diff = 0;
+  timeLeft.value.days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  timeLeft.value.hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  timeLeft.value.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  timeLeft.value.seconds = Math.floor((diff % (1000 * 60)) / 1000);
+};
+const formatNum = (num: number) => num.toString().padStart(2, '0');
+
+// --- ⭐ 终极时间轴控制 ⭐ ---
 const startShow = () => {
   if (!hasStarted.value) {
     hasStarted.value = true;
     isRandomFireworksActive.value = true; 
+    
+    // 启动倒计时计时器
+    updateCountdown();
+    timer = setInterval(updateCountdown, 1000);
 
-    // 1. T+0s: 立即显示主标题 (CSS动画耗时4s)
+    // 1. T+0s: 显示主标题
     showCenterTitle.value = true;
 
-    // 2. T+6s: 【修改点】给主标题留出2秒阅读缓冲，再开始左侧独白
-    // 原来是4000，现在改为6000
-    const delayLeftText = 7000; 
+    // 2. T+5s: 左侧独白开始打字
+    const delayLeftText = 5000; 
     setTimeout(() => {
       showFinalTextContainer.value = true;
       startTypewriter();
     }, delayLeftText);
 
-    // --- 动态计算后续时间点 (自动顺延) ---
+    // 动态计算左侧打字时长
+    const typingDuration = fullFinalText.length * TYPE_SPEED; // 约 6.5秒
+    const readBuffer = 2000; 
     
-    const typingDuration = fullFinalText.length * TYPE_SPEED;
-    const readBuffer = 3000; // 读完后的留白
-    
-    // 3. 中间副标题 ("愿我们的爱...")
+    // 3. T+13.5s: 中间副标题 ("愿我们的爱...")
     const delaySubtitle = delayLeftText + typingDuration + readBuffer;
     setTimeout(() => {
       showCenterSubtitle.value = true;
     }, delaySubtitle);
 
-    // 4. 底部文字 ("相遇...")
-    // 这里的间隔也稍微拉大一点 (4000 -> 4500)，节奏更舒缓
+    // 4. T+17.5s: 底部文字 ("相遇...")
     const delayBottom = delaySubtitle + 4000;
     setTimeout(() => {
       showBottomText.value = true;
     }, delayBottom);
 
-    // 5. 暂停随机烟花 (清场)
-    const delayClear = delayBottom + 5000;
+    // 5. T+21.5s: 暂停随机烟花 (清场)
+    const delayClear = delayBottom + 4000;
     setTimeout(() => {
       isRandomFireworksActive.value = false;
     }, delayClear);
 
-    // 6. 发射爱心烟花
+    // 6. T+22.5s: 发射爱心烟花
     const delayHeart = delayClear + 1000;
     setTimeout(() => {
       launchHeartPattern();
     }, delayHeart);
 
-    // 7. 恢复随机烟花
+    // 7. T+27.5s: 恢复随机烟花
+    // 爱心画完大概需要 4-5秒
+    const heartDuration = 5000;
     setTimeout(() => {
       isRandomFireworksActive.value = true;
-    }, delayHeart + 6000);
+    }, delayHeart + heartDuration);
+
+    // 8. T+32.5s: 右侧时钟浮现
+    // (爱心放完后 + 5秒)
+    const delayClock = delayHeart + heartDuration + 5000;
+    setTimeout(() => {
+      showRightClock.value = true;
+    }, delayClock);
   }
 };
 
@@ -369,13 +438,16 @@ onMounted(() => {
   loop();
 });
 
-onUnmounted(() => { cancelAnimationFrame(animationId); });
+onUnmounted(() => { 
+  cancelAnimationFrame(animationId); 
+  if(timer) clearInterval(timer);
+});
 </script>
 
 <style scoped>
-/* ... (引入字体部分保持不变) ... */
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&display=swap');
 
 .cinema-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; overflow: hidden; z-index: 9999; cursor: pointer; }
 canvas { display: block; }
@@ -387,46 +459,43 @@ canvas { display: block; }
 
 /* Main Content */
 .overlay-content { position: absolute; top: 0; left: 0; width: 100%; height: 70%; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; z-index: 10000; }
-.text-wrapper { text-align: center; color: white; } /* 去掉了之前的 animation fadeUpIn，改用内部元素控制 */
+.text-wrapper { text-align: center; color: white; }
 
 .title { 
   font-family: "Times New Roman", serif; 
   font-size: clamp(2rem, 5vw, 4rem); 
   font-weight: normal; 
-  margin-bottom: 2rem; /* 增加下边距，给副标题留足空间 */
+  margin-bottom: 2rem; 
   text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); 
   letter-spacing: 2px; 
   opacity: 1; 
 }
 
-/* --- ⭐ 修复后的打字机 CSS --- */
 .handwritten-title { 
   font-family: 'Dancing Script', cursive; 
   overflow: hidden; 
   white-space: nowrap; 
   border-right: 0.15em solid orange; 
-  width: 0; /* 默认宽度为0，不可见 */
+  width: 0; 
   text-shadow: 0 0 25px rgba(255, 240, 180, 0.7), 0 0 5px rgba(255, 240, 180, 0.5); 
   letter-spacing: normal; 
-  margin: 0 auto 2rem auto; /* 保持下边距 */
+  margin: 0 auto 2rem auto; 
 }
 
-/* 只有加上这个类名时，才开始播放动画 */
 .handwritten-title.start-typing {
   animation: 
-    typing 4s steps(30, end) forwards, /* forwards 保持结束状态 */
+    typing 4s steps(30, end) forwards, 
     blink-caret 0.75s step-end 8 forwards;
 }
 
-/* --- ⭐ 副标题容器：占位但透明 --- */
+/* Subtitle */
 .subtitle-container {
-  opacity: 0; /* 默认透明 */
+  opacity: 0; 
   transform: translateY(20px);
-  transition: all 2s ease; /* 渐显过渡 */
+  transition: all 2s ease; 
 }
-
 .subtitle-container.visible {
-  opacity: 1; /* 显示 */
+  opacity: 1; 
   transform: translateY(0);
 }
 
@@ -442,14 +511,51 @@ canvas { display: block; }
 .final-text-left p { font-family: "Songti SC", "SimSun", serif; font-size: 1.3rem; line-height: 1.8; color: rgba(255, 255, 255, 0.85); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 .cursor { display: inline-block; width: 2px; height: 1em; background-color: white; vertical-align: text-bottom; animation: blink-caret 0.75s step-end infinite; }
 
+/* ⭐ 右侧翻页时钟样式 ⭐ */
+.right-clock-container {
+  position: absolute;
+  top: 50%;
+  right: 5%; /* 距离右侧 5% */
+  transform: translateY(-50%);
+  z-index: 10005;
+  pointer-events: none;
+  text-align: center;
+  
+  background: rgba(20, 20, 40, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 25px 30px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.clock-label { font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 5px; letter-spacing: 2px; font-weight: 300; }
+.clock-date { font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 20px; letter-spacing: 1px; font-family: monospace; }
+.flip-clock { display: flex; justify-content: center; gap: 15px; }
+.flip-unit { display: flex; flex-direction: column; align-items: center; }
+.flip-card {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px; padding: 12px 8px; min-width: 50px;
+  text-align: center; font-family: 'Fira Code', monospace; font-size: 28px; font-weight: 600; color: #fff;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.5); box-shadow: inset 0 0 10px rgba(255,255,255,0.05), 0 5px 15px rgba(0,0,0,0.2);
+  position: relative; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.2);
+}
+.seconds-unit .flip-card { background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffedb3; }
+.unit-label { font-size: 11px; margin-top: 8px; opacity: 0.7; font-weight: 500; letter-spacing: 1px; color: rgba(255,255,255,0.8); }
+
 /* Animations */
 @keyframes fadeUpIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes typing { from { width: 0 } to { width: 100% } }
 @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: orange; } }
 @keyframes fadeInPulse { 0% { opacity: 0; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.95); } }
-
 .fade-enter-active, .fade-leave-active { transition: opacity 0.8s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .fade-slow-enter-active { transition: opacity 2s ease; }
 .fade-slow-enter-from { opacity: 0; }
+/* 时钟浮现动画 */
+.fade-slide-left-enter-active { transition: all 1.5s ease-out; }
+.fade-slide-left-enter-from { opacity: 0; transform: translate(30px, -50%); }
+/* 翻页数字动画 */
+.flip-enter-active { animation: flipIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.flip-leave-active { display: none; }
+@keyframes flipIn { from { opacity: 0; transform: perspective(400px) rotateX(-90deg); } to { opacity: 1; transform: perspective(400px) rotateX(0deg); } }
 </style>
