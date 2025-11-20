@@ -394,45 +394,74 @@ body, html {
   width: 95%;
 }
 
-/* Mobile (Phone) 模式：强制垂直布局 */
+/* --- 📱 Mobile (Phone) 深度适配优化 --- */
 .app-container.mode-mobile .content-main {
   flex-direction: column;
-  gap: 30px; 
-  padding: 25px; 
-  width: 95%;
-  margin-top: 20px;
-  overflow: hidden !important; 
+  justify-content: flex-start; /* 从顶部开始排列，而不是居中 */
+  align-items: center;
+  gap: 15px; /* 减小图片和文字的间距 (原30px) */
+  
+  /* 调整容器尺寸和边距 */
+  width: 88%;
+  height: auto;
+  max-height: 80vh; /* 限制最大高度，防止超出屏幕 */
+  padding: 25px 20px; /* 减小左右内边距 */
+  margin-top: 0; /* 去掉顶部额外边距 */
+  
+  /* 关键：如果内容太多，允许卡片内部滚动 */
+  overflow-y: auto !important; 
+  -webkit-overflow-scrolling: touch;
 }
+
+/* 1. 缩小拍立得图片 */
 .app-container.mode-mobile .polaroid {
-  width: 280px; 
-  margin-left: 0; 
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-bottom: 40px;
-  transform: rotate(-2deg);
+  width: 200px; /* 缩小宽度 (原280px) */
+  padding: 10px 10px 35px 10px; /* 减小拍立得留白 */
+  margin: 0;
+  transform: rotate(-1deg); /* 减小旋转角度，节省边缘空间 */
+  flex-shrink: 0; /* 防止图片被压扁 */
 }
+
+/* 2. 缩小拼贴画容器 */
 .app-container.mode-mobile .photo-collage {
-  width: 300px;
-  height: 280px;
+  width: 240px;
+  height: 220px;
   margin: 0 auto;
+  transform: scale(0.9); /* 整体缩小一点 */
 }
 .app-container.mode-mobile .collage-1, 
-.app-container.mode-mobile .collage-2,
+.app-container.mode-mobile .collage-2, 
 .app-container.mode-mobile .collage-3, 
 .app-container.mode-mobile .collage-4 {
-  width: 140px; /* 手机上拼贴画缩小 */
+  width: 110px; /* 缩小单张拼贴图 */
 }
+
+/* 3. 紧凑化文字区域 */
 .app-container.mode-mobile .text-area {
   text-align: center; 
   width: 100%;
   padding-left: 0;
 }
-.app-container.mode-mobile .text-area p.sentence-item {
-  font-size: 1.1rem;
-  margin: 8px 0;
-}
+
+/* 标题缩小 */
 .app-container.mode-mobile .slide-title {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
   text-align: center;
+}
+
+/* 日期标签缩小 */
+.app-container.mode-mobile .date-tag {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  margin-bottom: 10px;
+}
+
+/* 正文缩小并增加行高 */
+.app-container.mode-mobile .text-area p.sentence-item {
+  font-size: 0.95rem; /* 字体调小 (原1.1rem) */
+  line-height: 1.6;
+  margin: 4px 0; /* 减小段落间距 */
 }
 
 /* --- 设备选择遮罩样式 --- */
