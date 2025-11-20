@@ -12,16 +12,14 @@
 
     <div v-if="hasStarted" class="overlay-content">
       <div class="text-wrapper">
-        <transition name="fade-slow">
-          <h1 v-if="showCenterTitle" class="title handwritten-title">Happy Birthday, My Lovely Ty</h1>
-        </transition>
+        <h1 class="title handwritten-title" :class="{ 'start-typing': showCenterTitle }">
+          Happy Birthday, My Lovely Ty
+        </h1>
 
-        <transition name="fade-slow">
-          <div v-if="showCenterSubtitle">
-            <p class="subtitle">愿我们的爱，如这漫天烟火，绚烂且长明。</p>
-            <p class="date">2025.11.28</p> 
-          </div>
-        </transition>
+        <div class="subtitle-container" :class="{ 'visible': showCenterSubtitle }">
+          <p class="subtitle">愿我们的爱，如这漫天烟火，绚烂且长明。</p>
+          <p class="date">2025.11.28</p> 
+        </div>
       </div>
     </div>
 
@@ -375,6 +373,7 @@ onUnmounted(() => { cancelAnimationFrame(animationId); });
 </script>
 
 <style scoped>
+/* ... (引入字体部分保持不变) ... */
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
 
@@ -385,23 +384,50 @@ canvas { display: block; }
 .intro-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10002; pointer-events: none; }
 .intro-text-wrapper { text-align: center; color: rgba(255, 255, 255, 0.9); animation: fadeInPulse 3s ease-in-out infinite; }
 .intro-text { font-family: "Songti SC", "SimSun", serif; font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; font-weight: bold; }
-.intro-sub-text { font-family: "PingFang SC", sans-serif; font-size: 1.1rem; font-weight: 300; opacity: 0.8; letter-spacing: 2px; }
 
 /* Main Content */
 .overlay-content { position: absolute; top: 0; left: 0; width: 100%; height: 70%; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; z-index: 10000; }
-.text-wrapper { text-align: center; color: white; opacity: 0; animation: fadeUpIn 2s ease-out 0.5s forwards; }
-.title { font-family: "Times New Roman", serif; font-size: clamp(2rem, 5vw, 4rem); font-weight: normal; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); letter-spacing: 2px; opacity: 1; }
+.text-wrapper { text-align: center; color: white; } /* 去掉了之前的 animation fadeUpIn，改用内部元素控制 */
 
+.title { 
+  font-family: "Times New Roman", serif; 
+  font-size: clamp(2rem, 5vw, 4rem); 
+  font-weight: normal; 
+  margin-bottom: 2rem; /* 增加下边距，给副标题留足空间 */
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); 
+  letter-spacing: 2px; 
+  opacity: 1; 
+}
+
+/* --- ⭐ 修复后的打字机 CSS --- */
 .handwritten-title { 
   font-family: 'Dancing Script', cursive; 
   overflow: hidden; 
   white-space: nowrap; 
   border-right: 0.15em solid orange; 
-  animation: typing 4s steps(30, end) 1s forwards, blink-caret 0.75s step-end 8 forwards;
-  width: 0; 
+  width: 0; /* 默认宽度为0，不可见 */
   text-shadow: 0 0 25px rgba(255, 240, 180, 0.7), 0 0 5px rgba(255, 240, 180, 0.5); 
   letter-spacing: normal; 
-  margin: 0 auto;
+  margin: 0 auto 2rem auto; /* 保持下边距 */
+}
+
+/* 只有加上这个类名时，才开始播放动画 */
+.handwritten-title.start-typing {
+  animation: 
+    typing 4s steps(30, end) forwards, /* forwards 保持结束状态 */
+    blink-caret 0.75s step-end 8 forwards;
+}
+
+/* --- ⭐ 副标题容器：占位但透明 --- */
+.subtitle-container {
+  opacity: 0; /* 默认透明 */
+  transform: translateY(20px);
+  transition: all 2s ease; /* 渐显过渡 */
+}
+
+.subtitle-container.visible {
+  opacity: 1; /* 显示 */
+  transform: translateY(0);
 }
 
 .subtitle { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: clamp(1rem, 2vw, 1.5rem); font-weight: 300; color: rgba(255, 255, 255, 0.8); letter-spacing: 4px; margin-bottom: 1.5rem; }
@@ -421,6 +447,7 @@ canvas { display: block; }
 @keyframes typing { from { width: 0 } to { width: 100% } }
 @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: orange; } }
 @keyframes fadeInPulse { 0% { opacity: 0; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.95); } }
+
 .fade-enter-active, .fade-leave-active { transition: opacity 0.8s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .fade-slow-enter-active { transition: opacity 2s ease; }
