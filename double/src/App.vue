@@ -129,7 +129,7 @@ const slides = [
 ]
 
 // --- 2. 逻辑控制区 ---
-const currentIndex = ref(5) 
+const currentIndex = ref(0) 
 const isAnimate = ref(false)
 const displayedText = ref('') 
 const cursorVisible = ref(true) 
