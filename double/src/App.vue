@@ -78,17 +78,46 @@ const slides = [
     gallery: [
       { img: '/photos/记录/1010/1.jpg', text: '早起看见忘给小孩改作业的你' },
       { img: '/photos/记录/1010/2.jpg', text: '接着就是早上还没下班的月亮(然后我就去市政厅办事了😣)' },
-      { img: '/photos/记录/1010/3.jpg', text: '买菜随手拍拍拍 - 健康😁' },
       { img: '/photos/记录/1010/m.JPG', text: '好可爱的寻猫启示。我也喜欢猫🐱' },
       { img: '/photos/记录/1010/4.jpg', text: '刚给你看完欧洲超市的可颂就自己没忍住买一个吃🥐' },
       { img: '/photos/记录/1010/66.jpg', text: '你也在逛超市。聊完咖啡我决定给你买点咖啡粉试试☕️' },
       { img: '/photos/记录/1010/6.jpg', text: '国内油油的面包（除了山姆！）' },
       { img: '/photos/记录/1010/7.jpg', text: '回到家吃刚刚买回来的速冻披萨(留子经典出装)' },
-      { img: '/photos/记录/1010/33.jpg', text: '看起来好好吃的面包😋，我说放心吃热量算我的，你说我害人😁' },
+      { img: '/photos/记录/1010/33.jpg', text: '看起来好好吃的面包😋，我说放心吃热量算我的，你说我害人[捂嘴笑]。' },
       { img: '/photos/记录/1010/8.jpg', text: '最后还是买回去吃了...好好吃' },
-      { img: '/photos/记录/1010/9.png', text: '要我倒掉的蘑菇意面' }
+      { img: '/photos/记录/1010/9.png', text: '要我倒掉的蘑菇意面(不吃蘑菇！)' }
     ],
     text: '从我这边的清晨七点，一直聊到你那边的日落黄昏。以前觉得“永远有话说”是一种能力，现在才发现，那是因为遇到对的人。虽然相隔万里，但感觉就像在互相的耳边碎碎念。隔着几千公里和六个小时的时差，我们的生活依然能严丝合缝地拼在一起，真好。',
+  },
+
+  {
+    type: 'gallery',
+    title: '记录生活的我',
+    date: '2025.10',
+    backgroundType: 'image',
+    backgroundImage: '/photos/记录/back1.jpeg', 
+    gallery: [
+      { img: '/photos/记录/12.png', text: '被剪发哥剪出一个秃顶的我' },
+      { img: '/photos/记录/13.JPG', text: '😋早上煮出了溏心蛋🥚' },
+      { img: '/photos/记录/14.png', text: '来自中国的锁' },
+      { img: '/photos/记录/15.JPG', text: '弯弯的房东送我的辣椒酱拉🌶️' },
+      { img: '/photos/记录/8.jpeg', text: '健康的辣椒炒鸡腿肉🍗' },
+      { img: '/photos/记录/back.JPG', text: '临近秋天学校里好漂亮的秋景🍂' },
+      { img: '/photos/记录/4.jpeg', text: '小花园里的野猫，黑黑的🐈‍⬛' },
+      { img: '/photos/记录/2.jpeg', text: '好久没吃月饼🥮了😭' },
+      { img: '/photos/记录/3.jpeg', text: '公园吃cheese cake和寿司(后面被蜜蜂🐝追着跑)' },
+      { img: '/photos/记录/16.JPG', text: '准备辣椒炒肉中（腊肉怎么是红红的）' },
+      { img: '/photos/记录/25.jpeg', text: '咖啡哥带我在市中心喝☕️（又是被咖啡哥洗礼的一天）' },
+      { img: '/photos/记录/28.jpeg', text: '好漂亮的公园⛲️（ipad壁纸）' },
+      { img: '/photos/记录/26.JPG', text: '用同一个杯子的同一级的计算机土耳其老哥' },
+      { img: '/photos/记录/27.jpeg', text: '第一次参加学校的课' },
+      { img: '/photos/记录/30.JPG', text: '第一次吃学校饭堂的白人餐(😣)' },
+      { img: '/photos/记录/29.JPG', text: '开学典礼（TUM🧢）' },
+      { img: '/photos/记录/31.JPG', text: '我当时说要留这样的胡子🧔哈哈哈' },
+      { img: '/photos/记录/33.jpeg', text: '城墙猪排难吃哦' },
+      { img: '/photos/记录/5.jpg', text: '回家路上你说好看的树' }
+    ],
+    text: '这里有深秋的树、有来自中国的锁、还有我努力照顾好自己的证据（虽然偶尔也有翻车的时候）。从被剪坏的头发到TUM的开学典礼，从第一次尝试的学校‘白人餐’到路边偶遇的黑猫。这些看似毫无关联的碎片，拼凑出了我在慕尼黑的十月。其实生活里哪有那么多惊天动地的大事，大多都是这些鸡毛蒜皮、无关紧要。但我还是想把这些微不足道的瞬间都打包寄给你。因为在这个世界上，我所有的分享欲，所有的碎碎念，还有那些想说未说的话，都只想留给你。',
   },
   {
     type: 'letter', 
@@ -100,7 +129,7 @@ const slides = [
 ]
 
 // --- 2. 逻辑控制区 ---
-const currentIndex = ref(0) 
+const currentIndex = ref(5) 
 const isAnimate = ref(false)
 const displayedText = ref('') 
 const cursorVisible = ref(true) 
@@ -765,15 +794,13 @@ body, html {
 }
 
 .gallery-text {
-  background: rgba(255,255,255,0.8);
-  padding: 5px 10px;
-  border-radius: 8px;
-  margin-top: 10px;
+  /* background: rgba(255,255,255,0.8);  <-- 保持移除状态 */
+  margin-top: 12px;
   font-family: 'ZCOOL KuaiLe', cursive;
   color: var(--text-main);
-  font-size: 1rem;
+  font-size: 1.25rem; /* <-- 字体调大 */
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  font-weight: bold; 
 }
 
 /* 手机端画廊适配 */
@@ -794,7 +821,7 @@ body, html {
 .mode-mobile .gallery-text {
   flex-grow: 1;
   text-align: left;
-  font-size: 1rem;
+  font-size: 1.15rem; /* <-- 手机端也调大 */
   background: none;
   box-shadow: none;
   padding: 0;
@@ -817,25 +844,29 @@ body, html {
   pointer-events: none;
 }
 
-/* Gallery 文字区域容器 */
+/* Gallery 文字区域容器 - 修改处 */
 .gallery-text-area {
   width: 90%;
   max-width: 800px;
   margin-top: 30px;
   margin-bottom: 50px; 
   text-align: center;
-  background: rgba(255,255,255,0.6);
-  padding: 20px;
-  border-radius: 15px;
+  /* background: rgba(255,255,255,0.6); <-- 已彻底删除背景色 */
+  background: transparent; 
+  padding: 10px; /* 减少内边距 */
+  /* border-radius: 15px; <-- 已删除圆角 */
   flex-shrink: 0; /* 防止压缩 */
 }
 
-/* Gallery 单句文字样式 */
+/* Gallery 单句文字样式 - 修改处 */
 .gallery-sentence {
   text-align: center !important;
   margin-bottom: 10px;
-  font-size: 1.1rem !important;
+  font-size: 1.3rem !important; /* <-- 字体再次调大 (原 1.1rem) */
   color: var(--text-main);
   font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
+  animation: soft-float-up 4.0s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  line-height: 1.8;
+  font-weight: bold; /* 稍微加粗以防背景干扰 */
 }
 </style>
