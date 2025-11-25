@@ -106,6 +106,7 @@ const slides = [
       { img: '/photos/记录/2.jpeg', text: '好久没吃月饼🥮了😭' },
       { img: '/photos/记录/3.jpeg', text: '公园吃cheese cake和寿司(后面被蜜蜂🐝追着跑)' },
       { img: '/photos/记录/16.JPG', text: '准备辣椒炒肉中（腊肉怎么是红红的）' },
+      { img: '/photos/ty/18.jpg', text: '帮我也把把脉' },
       { img: '/photos/记录/25.jpeg', text: '咖啡哥带我在市中心喝☕️（又是被咖啡哥洗礼的一天）' },
       { img: '/photos/记录/28.jpeg', text: '好漂亮的公园⛲️（ipad壁纸）' },
       { img: '/photos/记录/26.JPG', text: '用同一个杯子的同一级的计算机土耳其老哥' },
@@ -124,7 +125,7 @@ const slides = [
     title: '按下快门记录的你',
     date: '2025.10',
     backgroundType: 'image',
-    backgroundImage: '/photos/s.jpg', // 选了一张风景图做背景，可自行更换
+    backgroundImage: '/photos/s.jpg', 
     gallery: [
       { img: '/photos/ty/41.jpg', text: '家教教小孩🧒' },
       { img: '/photos/ty/39.jpg', text: '人挤人的音乐节（担心死我了）' },
@@ -670,14 +671,13 @@ body, html {
   background: linear-gradient(135deg, #fefdfb 0%, #fcebeb 100%); 
 }
 
-/* --- 设备适配逻辑 --- */
 /* --- 设备适配逻辑 (iPad 11寸优化版) --- */
 
-/* 1. 平板默认（通常是横屏 Landscape） */
+/* 1. 平板默认（横屏 Landscape） */
 .app-container.mode-tablet .content-main {
-  transform: scale(0.92); /* 11寸屏幕较大，稍微放大一点视觉冲击力更强 */
-  width: 90%;
-  max-width: 1000px;
+  transform: scale(0.85); /* 🔴 修改：从 0.92 调小到 0.85，让画面更精致，不撑满屏幕 */
+  width: 85%;            /* 🔴 修改：宽度收窄，增加留白 */
+  max-width: 900px;      /* 🔴 修改：限制最大宽度 */
 }
 
 /* 2. 平板竖屏优化 (Portrait) - 当Ty竖着拿iPad时 */
@@ -687,18 +687,18 @@ body, html {
     align-items: center !important;
     justify-content: flex-start !important;
     transform: none !important; /* 取消缩放，使用自然宽度 */
-    width: 88% !important;
+    width: 85% !important;     /* 🔴 修改：稍微收窄一点 */
     height: auto !important;
     max-height: 85vh; /* 留出上下边距，防止贴边 */
     overflow-y: auto !important; /* 内容多时允许上下滑动 */
-    padding: 40px 30px !important;
-    gap: 30px;
+    padding: 30px 20px !important; /* 🔴 修改：内边距稍微减小 */
+    gap: 25px;
   }
 
   /* 图片样式调整 */
   .app-container.mode-tablet .polaroid {
     margin: 0 !important;
-    width: 340px !important; /* 图片放大，适应竖屏宽度 */
+    width: 280px !important; /* 🔴 修改：从 340px 缩小到 280px，防止图片太大 */
     transform: rotate(-2deg) !important;
     flex-shrink: 0;
   }
@@ -706,7 +706,7 @@ body, html {
   /* 第6页的多图拼贴调整 */
   .app-container.mode-tablet .photo-collage {
     margin: 0 !important;
-    transform: scale(0.85) !important; /* 拼贴稍微缩小以适应 */
+    transform: scale(0.75) !important; /* 🔴 修改：拼贴画也对应缩小 */
     flex-shrink: 0;
   }
 
@@ -719,19 +719,20 @@ body, html {
 
   .app-container.mode-tablet .slide-title {
     text-align: center !important;
-    font-size: 1.6rem !important;
+    font-size: 1.4rem !important; /* 🔴 修改：字号微调 */
   }
 
   .app-container.mode-tablet .text-area p.sentence-item {
     text-align: center !important;
-    font-size: 1.25rem !important; /* 字号适中 */
+    font-size: 1.15rem !important; /* 🔴 修改：正文不宜过大 */
   }
   
   /* 修复画廊在竖屏平板的显示 */
   .app-container.mode-tablet .gallery-grid {
-    gap: 25px;
+    gap: 20px;
   }
 }
+
 /* Mobile (Phone) - 针对 iPhone 6.3寸 (Pro) 优化 */
 .app-container.mode-mobile .content-main {
   display: flex !important;
