@@ -5,7 +5,7 @@
     <transition name="fade">
       <div v-if="!hasStarted" class="intro-overlay">
         <div class="intro-text-wrapper">
-          <p class="intro-text">轻触屏幕 开启生日惊喜</p>
+          <p class="intro-text">轻触屏幕</p>
         </div>
       </div>
     </transition>
@@ -104,14 +104,13 @@ const showCenterTitle = ref(false);
 const showFinalTextContainer = ref(false); 
 const showCenterSubtitle = ref(false); 
 const showBottomText = ref(false);
-const showRightClock = ref(false); // 右侧时钟
+const showRightClock = ref(false);
 
 // 左侧打字机相关
 const displayedFinalText = ref(''); 
-// \u3000 代表一个汉字宽度的空格
 const fullFinalText = "\u3000\u3000其实我不记得和AI一起改了多少个 Bug， 也不记得熬了几个夜。 我只记得，在敲下每一行代码的时候， 脑海里全是你看到它时惊喜的样子。 只要你笑了，这一切就有了意义。\n\u3000\u3000汤悦，生日快乐，往后余生，年年岁岁有我。";
 const isFinalTextTyping = ref(false);
-const TYPE_SPEED = 150; // 稍微调快一点打字速度，让iPad用户等待时间变短
+const TYPE_SPEED = 150; 
 
 // 倒计时相关
 const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -129,61 +128,50 @@ const updateCountdown = () => {
 };
 const formatNum = (num: number) => num.toString().padStart(2, '0');
 
-// --- ⭐ 终极时间轴控制 ⭐ ---
+// --- 时间轴控制 ---
 const startShow = () => {
   if (!hasStarted.value) {
     hasStarted.value = true;
     isRandomFireworksActive.value = true; 
-    
-    // 启动倒计时计时器
     updateCountdown();
     timer = setInterval(updateCountdown, 1000);
 
-    // 1. T+0s: 显示主标题
     showCenterTitle.value = true;
 
-    // 2. T+3s: 左侧独白开始打字 (稍微提前一点)
     const delayLeftText = 3000; 
     setTimeout(() => {
       showFinalTextContainer.value = true;
       startTypewriter();
     }, delayLeftText);
 
-    // 动态计算打字时长
     const typingDuration = fullFinalText.length * TYPE_SPEED; 
     const readBuffer = 1000; 
     
-    // 3. T+Subtitle: 中间副标题
     const delaySubtitle = delayLeftText + typingDuration + readBuffer;
     setTimeout(() => {
       showCenterSubtitle.value = true;
     }, delaySubtitle);
 
-    // 4. T+Bottom: 底部文字
     const delayBottom = delaySubtitle + 2000;
     setTimeout(() => {
       showBottomText.value = true;
     }, delayBottom);
 
-    // 5. T+Clear: 暂停随机烟花
     const delayClear = delayBottom + 3000;
     setTimeout(() => {
       isRandomFireworksActive.value = false;
     }, delayClear);
 
-    // 6. T+Heart: 发射爱心烟花
     const delayHeart = delayClear + 1000;
     setTimeout(() => {
       launchHeartPattern();
     }, delayHeart);
 
-    // 7. T+Resume: 恢复随机烟花
     const heartDuration = 5000;
     setTimeout(() => {
       isRandomFireworksActive.value = true;
     }, delayHeart + heartDuration);
 
-    // 8. T+Clock: 右侧时钟浮现
     const delayClock = delayHeart + heartDuration + 3000;
     setTimeout(() => {
       showRightClock.value = true;
@@ -191,7 +179,6 @@ const startShow = () => {
   }
 };
 
-// --- 爱心烟花阵列 ---
 const launchHeartPattern = () => {
   if (!ctx) return;
   const centerX = width / 2;
@@ -204,7 +191,6 @@ const launchHeartPattern = () => {
     const stepSize = Math.PI / steps;
     const t1 = Math.PI - (i * stepSize);
     const t2 = Math.PI + (i * stepSize);
-
     const launchPair = (t: number) => {
        const x = 16 * Math.pow(Math.sin(t), 3);
        const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
@@ -213,13 +199,8 @@ const launchHeartPattern = () => {
        const startX = width / 2 + (Math.random() - 0.5) * 200;
        fireworks.push(new Firework(startX, height, targetX, targetY, true));
     }
-
-    setTimeout(() => {
-      launchPair(t1);
-      launchPair(t2);
-    }, i * 100); 
+    setTimeout(() => { launchPair(t1); launchPair(t2); }, i * 100); 
   }
-
   for(let j = -2; j <= 2; j++) {
       const tx = width/2 + j * (width * 0.15);
       const ty = height * 0.6 + Math.abs(j) * 50;
@@ -229,7 +210,6 @@ const launchHeartPattern = () => {
   }
 };
 
-// 左侧打字机
 const startTypewriter = () => {
   isFinalTextTyping.value = true;
   let index = 0;
@@ -244,10 +224,7 @@ const startTypewriter = () => {
   }, TYPE_SPEED); 
 };
 
-// --- 烟花粒子系统 ---
-const CONFIG = {
-  particleCount: 300, gravity: 0.06, friction: 0.96, skyColor: '#050510', horizonColor: '#1a1a3a',
-};
+const CONFIG = { particleCount: 300, gravity: 0.06, friction: 0.96, skyColor: '#050510', horizonColor: '#1a1a3a' };
 
 class Particle {
   x: number; y: number; vx: number; vy: number; alpha: number; color: string; decay: number; size: number;
@@ -284,8 +261,7 @@ class Firework {
   distanceToTarget: number; distanceTraveled: number = 0;
   coordinates: {x: number, y: number}[] = [];
   angle: number; speed: number = 2; acceleration: number = 1.05;
-  brightness: number; targetRadius: number = 1; hue: number; exploded: boolean = false;
-  isSpecial: boolean;
+  brightness: number; targetRadius: number = 1; hue: number; isSpecial: boolean;
 
   constructor(sx: number, sy: number, tx: number, ty: number, isSpecial: boolean = false) {
     this.x = sx; this.y = sy; this.sx = sx; this.sy = sy; this.tx = tx; this.ty = ty;
@@ -293,12 +269,7 @@ class Firework {
     this.distanceToTarget = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
     this.angle = Math.atan2(ty - sy, tx - sx);
     this.brightness = Math.random() * 50 + 50;
-    
-    if (this.isSpecial) {
-       this.hue = 330 + Math.random() * 20; 
-    } else {
-       this.hue = Math.floor(Math.random() * 360);
-    }
+    this.hue = this.isSpecial ? 330 + Math.random() * 20 : Math.floor(Math.random() * 360);
     while(this.coordinates.length < 3) { this.coordinates.push({x: sx, y: sy}); }
   }
 
@@ -327,9 +298,7 @@ let particles: Particle[] = [];
 let stars: {x: number, y: number, size: number, alpha: number, blink: number}[] = [];
 
 function createParticles(x: number, y: number, hue: number, isSpecial: boolean) {
-  for (let i = 0; i < CONFIG.particleCount; i++) { 
-    particles.push(new Particle(x, y, hue, isSpecial)); 
-  }
+  for (let i = 0; i < CONFIG.particleCount; i++) { particles.push(new Particle(x, y, hue, isSpecial)); }
 }
 
 function drawBackground() {
@@ -409,7 +378,6 @@ function loop() {
   ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; ctx.fillRect(0, 0, width, height);
   ctx.globalCompositeOperation = 'source-over';
   drawBackground();
-
   if (hasStarted.value && isRandomFireworksActive.value) {
     if (Math.random() < 0.03) { 
       const startX = Math.random() * (width * 0.8) + width * 0.1;
@@ -418,7 +386,6 @@ function loop() {
       fireworks.push(new Firework(startX, height, targetX, targetY));
     }
   }
-
   let i = fireworks.length; while(i--) { fireworks[i].draw(ctx); fireworks[i].update(i); }
   ctx.globalCompositeOperation = 'lighter'; drawReflection();
   let j = particles.length; while(j--) { particles[j].draw(ctx); particles[j].update(); if (particles[j].alpha <= 0) { particles.splice(j, 1); } }
@@ -458,7 +425,7 @@ canvas { display: block; }
 .intro-text-wrapper { text-align: center; color: rgba(255, 255, 255, 0.9); animation: fadeInPulse 3s ease-in-out infinite; }
 .intro-text { font-family: "Songti SC", "SimSun", serif; font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; font-weight: bold; }
 
-/* Main Content - Center Title */
+/* Main Content */
 .overlay-content { 
   position: absolute; 
   top: 0; 
@@ -495,90 +462,29 @@ canvas { display: block; }
   margin: 0 auto 2rem auto; 
 }
 
-.handwritten-title.start-typing {
-  animation: 
-    typing 4s steps(30, end) forwards, 
-    blink-caret 0.75s step-end 8 forwards;
-}
+.handwritten-title.start-typing { animation: typing 4s steps(30, end) forwards, blink-caret 0.75s step-end 8 forwards; }
 
-/* Subtitle */
-.subtitle-container {
-  opacity: 0; 
-  transform: translateY(20px);
-  transition: all 2s ease; 
-}
-.subtitle-container.visible {
-  opacity: 1; 
-  transform: translateY(0);
-}
-
-.subtitle { 
-  font-family: "PingFang SC", "Microsoft YaHei", sans-serif; 
-  font-size: clamp(1rem, 2vw, 1.5rem); 
-  font-weight: 300; 
-  color: rgba(255, 255, 255, 0.8); 
-  letter-spacing: 4px; 
-  margin-bottom: 1.5rem;
-  line-height: 1.6; 
-}
+.subtitle-container { opacity: 0; transform: translateY(20px); transition: all 2s ease; }
+.subtitle-container.visible { opacity: 1; transform: translateY(0); }
+.subtitle { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: clamp(1rem, 2vw, 1.5rem); font-weight: 300; color: rgba(255, 255, 255, 0.8); letter-spacing: 4px; margin-bottom: 1.5rem; line-height: 1.6; }
 .date { font-size: 0.9rem; color: rgba(255, 255, 255, 0.5); letter-spacing: 2px; font-family: monospace; margin-bottom: 1rem; }
 
-/* Bottom Text */
 .bottom-text-overlay { position: absolute; bottom: 5vh; left: 0; width: 100%; text-align: center; z-index: 10001; opacity: 0; animation: fadeUpIn 2s ease-out 1.5s forwards; }
 
-/* Left Text (Deskop Default) */
-.final-text-left { 
-  position: absolute; 
-  top: 50%; 
-  left: 5%; 
-  transform: translateY(-50%); 
-  max-width: 300px; 
-  text-align: left; 
-  z-index: 10005; 
-  pointer-events: none; 
-}
-.final-text-left p { 
-  font-family: "Songti SC", "SimSun", serif; 
-  font-size: 1.3rem; 
-  line-height: 1.8; 
-  color: rgba(255, 255, 255, 0.85); 
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  white-space: pre-wrap; 
-}
+/* 默认（电脑端）样式 */
+.final-text-left { position: absolute; top: 50%; left: 5%; transform: translateY(-50%); max-width: 300px; text-align: left; z-index: 10005; pointer-events: none; }
+.final-text-left p { font-family: "Songti SC", "SimSun", serif; font-size: 1.3rem; line-height: 1.8; color: rgba(255, 255, 255, 0.85); text-shadow: 0 2px 4px rgba(0,0,0,0.8); white-space: pre-wrap; }
 .cursor { display: inline-block; width: 2px; height: 1em; background-color: white; vertical-align: text-bottom; animation: blink-caret 0.75s step-end infinite; }
 
-/* Right Clock (Desktop Default) */
-.right-clock-container {
-  position: absolute;
-  top: 50%;
-  right: 5%; 
-  transform: translateY(-50%);
-  z-index: 10005;
-  pointer-events: none;
-  text-align: center;
-  
-  background: rgba(20, 20, 40, 0.4);
-  backdrop-filter: blur(8px);
-  padding: 25px 30px;
-  border-radius: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
+.right-clock-container { position: absolute; top: 50%; right: 5%; transform: translateY(-50%); z-index: 10005; pointer-events: none; text-align: center; background: rgba(20, 20, 40, 0.4); backdrop-filter: blur(8px); padding: 25px 30px; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 .clock-label { font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 5px; letter-spacing: 2px; font-weight: 300; }
 .clock-date { font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 20px; letter-spacing: 1px; font-family: monospace; }
 .flip-clock { display: flex; justify-content: center; gap: 15px; }
 .flip-unit { display: flex; flex-direction: column; align-items: center; }
-.flip-card {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px; padding: 12px 8px; min-width: 50px;
-  text-align: center; font-family: 'Fira Code', monospace; font-size: 28px; font-weight: 600; color: #fff;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.5); box-shadow: inset 0 0 10px rgba(255,255,255,0.05), 0 5px 15px rgba(0,0,0,0.2);
-  position: relative; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.2);
-}
+.flip-card { background: rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 12px 8px; min-width: 50px; text-align: center; font-family: 'Fira Code', monospace; font-size: 28px; font-weight: 600; color: #fff; text-shadow: 0 2px 5px rgba(0,0,0,0.5); box-shadow: inset 0 0 10px rgba(255,255,255,0.05), 0 5px 15px rgba(0,0,0,0.2); position: relative; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.2); }
 .seconds-unit .flip-card { background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffedb3; }
 .unit-label { font-size: 11px; margin-top: 8px; opacity: 0.7; font-weight: 500; letter-spacing: 1px; color: rgba(255,255,255,0.8); }
 
-/* Animations */
 @keyframes fadeUpIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes typing { from { width: 0 } to { width: 100% } }
 @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: orange; } }
@@ -593,82 +499,63 @@ canvas { display: block; }
 .flip-leave-active { display: none; }
 @keyframes flipIn { from { opacity: 0; transform: perspective(400px) rotateX(-90deg); } to { opacity: 1; transform: perspective(400px) rotateX(0deg); } }
 
-/* 🌟🌟🌟 核心修改区：平板/iPad 垂直布局适配 🌟🌟🌟 */
+/* 🌟🌟🌟 平板/iPad 核心适配区域 🌟🌟🌟 */
 @media screen and (max-width: 1200px) {
-  
-  /* 1. 标题区：不再垂直居中，而是靠上 */
+  /* 1. 标题区 */
   .overlay-content {
     justify-content: flex-start;
-    padding-top: 15vh; /* 距离顶部 15%，留出空间给烟花 */
-    height: auto;
+    padding-top: 15vh; /* 保持不变，留出上部空间 */
   }
-  .title {
-    font-size: 2.2rem; /* 字体适度缩小 */
-    margin-bottom: 0.5rem;
-  }
-  .subtitle-container {
-    margin-top: 10px;
-  }
-  .subtitle {
-    font-size: 1rem;
-    line-height: 1.6;
-    max-width: 90%;
-    margin: 0 auto;
-  }
-
-  /* 2. 左侧独白（现在变到中间）：垂直堆叠 */
+  
+  /* 2. 左侧独白：调整为“左上”区域，去背景 */
   .final-text-left {
     position: absolute;
-    top: 40%; /* 位于屏幕中间偏上 */
-    left: 50%;
-    transform: translate(-50%, 0); /* 水平居中 */
-    width: 85%;
-    max-width: 600px;
+    /* 核心修改：位置提得比较高 (42%)，避开底部中间的小人 */
+    top: 42%; 
+    left: 2%; /* 贴近左侧 */
+    transform: translateY(-50%); /* 保持垂直方向的自身居中修正 */
+    width: 40%; /* 限制宽度，不要伸到屏幕中间 */
+    max-width: none;
     
-    /* 增加半透明黑色背景，防止文字与烟花重叠看不清 */
-    background: rgba(0, 0, 0, 0.4); 
-    backdrop-filter: blur(4px);
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center; /* iPad上居中对齐更有仪式感 */
-    
-    /* 确保层级高于烟花，但低于某些交互 */
-    z-index: 10005;
+    background: none; /* ✨ 去掉背景色 */
+    padding: 0; /* 去掉内边距 */
+    text-align: left;
   }
   
   .final-text-left p {
-    font-size: 1.1rem;
-    text-align: left; /* 保持左对齐阅读习惯，或者改成center看喜好 */
-    display: inline-block; /* 配合父级text-align: center实现块居中 */
+    font-size: 1rem; /* 字体稍微改小一点点适应窄屏 */
+    line-height: 1.6;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.9); /* 加强阴影，保证无背景时也能看清 */
   }
 
-  /* 3. 右侧倒计时（现在变到最下方）：垂直堆叠 */
+  /* 3. 右侧倒计时：调整为“右上”区域，去背景 */
   .right-clock-container {
     position: absolute;
-    top: auto; /* 取消顶部定位 */
-    bottom: 8vh; /* 固定在底部 */
-    right: auto; 
-    left: 50%;
-    transform: translate(-50%, 0); /* 水平居中 */
-    width: auto;
+    /* 核心修改：位置和左侧文字平行 (42%) */
+    top: 42%;
+    right: 2%; /* 贴近右侧 */
+    bottom: auto; /* 取消之前的底部定位 */
+    left: auto;
+    transform: translateY(-50%) scale(0.75); /* 缩小至 75% */
+    transform-origin: right center; /* 缩放原点靠右 */
     
-    /* 稍微缩小尺寸适配窄屏 */
-    scale: 0.85;
-    transform-origin: bottom center;
+    background: none; /* ✨ 去掉背景色 */
+    border: none; /* 去掉边框 */
+    box-shadow: none; /* 去掉阴影 */
+    padding: 0;
   }
 
-  /* 4. 动画修正：从底部浮现而不是从右边滑入 */
-  .fade-slide-left-enter-from { 
-    opacity: 0; 
-    transform: translate(-50%, 30px); /* 注意这里保持 translate(-50%) 的水平居中状态 */
+  /* 4. 调整倒计时数字卡片，保证无背景时的清晰度 */
+  .flip-card {
+    background: rgba(255, 255, 255, 0.2); /*稍微加深一点点数字背景*/
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 }
 
-/* 📱 手机端适配 (如果需要更小的屏幕) */
+/* 📱 手机端适配 (更小的屏幕) */
 @media screen and (max-width: 600px) {
-  .title { font-size: 1.6rem; }
-  .final-text-left { top: 35%; padding: 15px; width: 92%; }
-  .final-text-left p { font-size: 0.95rem; }
-  .right-clock-container { scale: 0.7; bottom: 5vh; }
+  /* 手机太窄了，只能变回上下堆叠，不然看不清 */
+  .final-text-left { top: 35%; width: 90%; left: 5%; text-align: center; }
+  .right-clock-container { top: auto; bottom: 10vh; right: 50%; transform: translate(50%, 0) scale(0.7); transform-origin: center bottom; }
 }
 </style>
