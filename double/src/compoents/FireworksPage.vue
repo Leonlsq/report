@@ -5,7 +5,7 @@
     <transition name="fade">
       <div v-if="!hasStarted" class="intro-overlay">
         <div class="intro-text-wrapper">
-          <p class="intro-text">轻触屏幕</p>
+          <p class="intro-text">轻触屏幕 开启生日惊喜</p>
         </div>
       </div>
     </transition>
@@ -111,7 +111,7 @@ const displayedFinalText = ref('');
 // \u3000 代表一个汉字宽度的空格
 const fullFinalText = "\u3000\u3000其实我不记得和AI一起改了多少个 Bug， 也不记得熬了几个夜。 我只记得，在敲下每一行代码的时候， 脑海里全是你看到它时惊喜的样子。 只要你笑了，这一切就有了意义。\n\u3000\u3000汤悦，生日快乐，往后余生，年年岁岁有我。";
 const isFinalTextTyping = ref(false);
-const TYPE_SPEED = 250; 
+const TYPE_SPEED = 150; // 稍微调快一点打字速度，让iPad用户等待时间变短
 
 // 倒计时相关
 const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -142,51 +142,49 @@ const startShow = () => {
     // 1. T+0s: 显示主标题
     showCenterTitle.value = true;
 
-    // 2. T+5s: 左侧独白开始打字
-    const delayLeftText = 5000; 
+    // 2. T+3s: 左侧独白开始打字 (稍微提前一点)
+    const delayLeftText = 3000; 
     setTimeout(() => {
       showFinalTextContainer.value = true;
       startTypewriter();
     }, delayLeftText);
 
-    // 动态计算左侧打字时长
-    const typingDuration = fullFinalText.length * TYPE_SPEED; // 约 6.5秒
-    const readBuffer = 2000; 
+    // 动态计算打字时长
+    const typingDuration = fullFinalText.length * TYPE_SPEED; 
+    const readBuffer = 1000; 
     
-    // 3. T+13.5s: 中间副标题 ("愿我们的爱...")
+    // 3. T+Subtitle: 中间副标题
     const delaySubtitle = delayLeftText + typingDuration + readBuffer;
     setTimeout(() => {
       showCenterSubtitle.value = true;
     }, delaySubtitle);
 
-    // 4. T+17.5s: 底部文字 ("相遇...")
-    const delayBottom = delaySubtitle + 4000;
+    // 4. T+Bottom: 底部文字
+    const delayBottom = delaySubtitle + 2000;
     setTimeout(() => {
       showBottomText.value = true;
     }, delayBottom);
 
-    // 5. T+21.5s: 暂停随机烟花 (清场)
-    const delayClear = delayBottom + 4000;
+    // 5. T+Clear: 暂停随机烟花
+    const delayClear = delayBottom + 3000;
     setTimeout(() => {
       isRandomFireworksActive.value = false;
     }, delayClear);
 
-    // 6. T+22.5s: 发射爱心烟花
+    // 6. T+Heart: 发射爱心烟花
     const delayHeart = delayClear + 1000;
     setTimeout(() => {
       launchHeartPattern();
     }, delayHeart);
 
-    // 7. T+27.5s: 恢复随机烟花
-    // 爱心画完大概需要 4-5秒
+    // 7. T+Resume: 恢复随机烟花
     const heartDuration = 5000;
     setTimeout(() => {
       isRandomFireworksActive.value = true;
     }, delayHeart + heartDuration);
 
-    // 8. T+32.5s: 右侧时钟浮现
-    // (爱心放完后 + 5秒)
-    const delayClock = delayHeart + heartDuration + 5000;
+    // 8. T+Clock: 右侧时钟浮现
+    const delayClock = delayHeart + heartDuration + 3000;
     setTimeout(() => {
       showRightClock.value = true;
     }, delayClock);
@@ -460,8 +458,20 @@ canvas { display: block; }
 .intro-text-wrapper { text-align: center; color: rgba(255, 255, 255, 0.9); animation: fadeInPulse 3s ease-in-out infinite; }
 .intro-text { font-family: "Songti SC", "SimSun", serif; font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; font-weight: bold; }
 
-/* Main Content */
-.overlay-content { position: absolute; top: 0; left: 0; width: 100%; height: 70%; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; z-index: 10000; }
+/* Main Content - Center Title */
+.overlay-content { 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 70%; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center; 
+  pointer-events: none; 
+  z-index: 10000; 
+}
 .text-wrapper { text-align: center; color: white; }
 
 .title { 
@@ -509,31 +519,39 @@ canvas { display: block; }
   color: rgba(255, 255, 255, 0.8); 
   letter-spacing: 4px; 
   margin-bottom: 1.5rem;
-  line-height: 1.6; /* 新增：增加行高，让两行字不挤在一起 */
+  line-height: 1.6; 
 }
 .date { font-size: 0.9rem; color: rgba(255, 255, 255, 0.5); letter-spacing: 2px; font-family: monospace; margin-bottom: 1rem; }
 
 /* Bottom Text */
 .bottom-text-overlay { position: absolute; bottom: 5vh; left: 0; width: 100%; text-align: center; z-index: 10001; opacity: 0; animation: fadeUpIn 2s ease-out 1.5s forwards; }
-.new-chinese-text { font-family: "Noto Serif SC", "Songti SC", "SimSun", "Times New Roman", serif; font-size: clamp(1.2rem, 3vw, 2rem); color: rgba(255, 255, 255, 0.9); font-weight: 600; letter-spacing: 10px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); margin: 0; }
 
-/* Left Text */
-.final-text-left { position: absolute; top: 50%; left: 5%; transform: translateY(-50%); max-width: 300px; text-align: left; z-index: 10005; pointer-events: none; }
+/* Left Text (Deskop Default) */
+.final-text-left { 
+  position: absolute; 
+  top: 50%; 
+  left: 5%; 
+  transform: translateY(-50%); 
+  max-width: 300px; 
+  text-align: left; 
+  z-index: 10005; 
+  pointer-events: none; 
+}
 .final-text-left p { 
   font-family: "Songti SC", "SimSun", serif; 
   font-size: 1.3rem; 
   line-height: 1.8; 
   color: rgba(255, 255, 255, 0.85); 
   text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  white-space: pre-wrap; /* ✨ 关键修改：允许识别 \n 换行符 */
+  white-space: pre-wrap; 
 }
 .cursor { display: inline-block; width: 2px; height: 1em; background-color: white; vertical-align: text-bottom; animation: blink-caret 0.75s step-end infinite; }
 
-/* ⭐ 右侧翻页时钟样式 ⭐ */
+/* Right Clock (Desktop Default) */
 .right-clock-container {
   position: absolute;
   top: 50%;
-  right: 5%; /* 距离右侧 5% */
+  right: 5%; 
   transform: translateY(-50%);
   z-index: 10005;
   pointer-events: none;
@@ -569,11 +587,88 @@ canvas { display: block; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .fade-slow-enter-active { transition: opacity 2s ease; }
 .fade-slow-enter-from { opacity: 0; }
-/* 时钟浮现动画 */
 .fade-slide-left-enter-active { transition: all 1.5s ease-out; }
 .fade-slide-left-enter-from { opacity: 0; transform: translate(30px, -50%); }
-/* 翻页数字动画 */
 .flip-enter-active { animation: flipIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 .flip-leave-active { display: none; }
 @keyframes flipIn { from { opacity: 0; transform: perspective(400px) rotateX(-90deg); } to { opacity: 1; transform: perspective(400px) rotateX(0deg); } }
+
+/* 🌟🌟🌟 核心修改区：平板/iPad 垂直布局适配 🌟🌟🌟 */
+@media screen and (max-width: 1200px) {
+  
+  /* 1. 标题区：不再垂直居中，而是靠上 */
+  .overlay-content {
+    justify-content: flex-start;
+    padding-top: 15vh; /* 距离顶部 15%，留出空间给烟花 */
+    height: auto;
+  }
+  .title {
+    font-size: 2.2rem; /* 字体适度缩小 */
+    margin-bottom: 0.5rem;
+  }
+  .subtitle-container {
+    margin-top: 10px;
+  }
+  .subtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  /* 2. 左侧独白（现在变到中间）：垂直堆叠 */
+  .final-text-left {
+    position: absolute;
+    top: 40%; /* 位于屏幕中间偏上 */
+    left: 50%;
+    transform: translate(-50%, 0); /* 水平居中 */
+    width: 85%;
+    max-width: 600px;
+    
+    /* 增加半透明黑色背景，防止文字与烟花重叠看不清 */
+    background: rgba(0, 0, 0, 0.4); 
+    backdrop-filter: blur(4px);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center; /* iPad上居中对齐更有仪式感 */
+    
+    /* 确保层级高于烟花，但低于某些交互 */
+    z-index: 10005;
+  }
+  
+  .final-text-left p {
+    font-size: 1.1rem;
+    text-align: left; /* 保持左对齐阅读习惯，或者改成center看喜好 */
+    display: inline-block; /* 配合父级text-align: center实现块居中 */
+  }
+
+  /* 3. 右侧倒计时（现在变到最下方）：垂直堆叠 */
+  .right-clock-container {
+    position: absolute;
+    top: auto; /* 取消顶部定位 */
+    bottom: 8vh; /* 固定在底部 */
+    right: auto; 
+    left: 50%;
+    transform: translate(-50%, 0); /* 水平居中 */
+    width: auto;
+    
+    /* 稍微缩小尺寸适配窄屏 */
+    scale: 0.85;
+    transform-origin: bottom center;
+  }
+
+  /* 4. 动画修正：从底部浮现而不是从右边滑入 */
+  .fade-slide-left-enter-from { 
+    opacity: 0; 
+    transform: translate(-50%, 30px); /* 注意这里保持 translate(-50%) 的水平居中状态 */
+  }
+}
+
+/* 📱 手机端适配 (如果需要更小的屏幕) */
+@media screen and (max-width: 600px) {
+  .title { font-size: 1.6rem; }
+  .final-text-left { top: 35%; padding: 15px; width: 92%; }
+  .final-text-left p { font-size: 0.95rem; }
+  .right-clock-container { scale: 0.7; bottom: 5vh; }
+}
 </style>
