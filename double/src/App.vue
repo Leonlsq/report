@@ -448,12 +448,26 @@ watch([currentIndex, isLocked], ([newIndex, newLockedState]) => {
   }
 })
 
-// ⭐⭐⭐ 修改点：添加参数 isFromButton，用于区分是点击背景还是点击按钮 ⭐⭐⭐
+// ⭐⭐⭐ 新增：全屏辅助函数 ⭐⭐⭐
+const triggerFullScreen = () => {
+  const docEl = document.documentElement as any
+  // 尝试调用各种浏览器的全屏API
+  const requestMethod = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+
+  if (requestMethod) {
+    // 兼容写法
+    if (docEl.requestFullscreen) {
+       docEl.requestFullscreen().catch((e: any) => console.log('Fullscreen blocked or not supported', e))
+    } else if (docEl.webkitRequestFullscreen) {
+       docEl.webkitRequestFullscreen() 
+    }
+  }
+}
+
 const nextSlide = (isFromButton: boolean | Event = false) => {
   if (isLoading.value || showDeviceSelector.value || isLocked.value) return
   if (showFireworksPage.value) return
 
-  // ⭐⭐⭐ 新增逻辑：如果是最后一页(信件页)，必须是通过按钮点击(isFromButton === true)才能翻页
   const isConfirmed = isFromButton === true
   if (currentSlide.value.type === 'letter' && !isConfirmed) {
     return
@@ -469,7 +483,6 @@ const nextSlide = (isFromButton: boolean | Event = false) => {
       .catch((e) => console.log('等待交互播放', e))
   }
 
-  // ⭐⭐⭐ 自动滚动与分步逻辑 (兼容 Content, Gallery, Batch-Gallery) ⭐⭐⭐
   const isContent = currentSlide.value.type === 'content'
   const isGallery = currentSlide.value.type === 'gallery'
   const isBatchGallery = currentSlide.value.type === 'batch-gallery'
@@ -478,15 +491,12 @@ const nextSlide = (isFromButton: boolean | Event = false) => {
     let totalSteps = 0
 
     if (isBatchGallery) {
-       // 🟢 修正逻辑：总步数 = 1(初始空白) + 批次数 + 文本句数
        const batchSize = 4
        const batchCount = Math.ceil((currentSlide.value.gallery?.length || 0) / batchSize)
        totalSteps = 1 + batchCount + currentSlideSentences.value.length
     } else if (isGallery) {
-      // Gallery页：总步数 = 照片数 + 句子数
       totalSteps = (currentSlide.value.gallery?.length || 0) + currentSlideSentences.value.length
     } else {
-      // Content页：总步数 = 照片数 + 句子数
       if (currentIndex.value === 5 && currentSlide.value.images) {
         totalSteps = currentSlide.value.images.length + currentSlideSentences.value.length
       } else {
@@ -494,10 +504,8 @@ const nextSlide = (isFromButton: boolean | Event = false) => {
       }
     }
 
-    // 只要步数还没走完，点击就是 +1 步，而不翻页
     if (contentStep.value < totalSteps) {
       contentStep.value++
-      
       nextTick(() => {
         setTimeout(() => {
           const container = document.querySelector('.mode-mobile .content-main') || document.querySelector('.gallery-container')
@@ -509,7 +517,6 @@ const nextSlide = (isFromButton: boolean | Event = false) => {
           }
         }, 100) 
       })
-
       return 
     }
   }
@@ -529,7 +536,6 @@ const nextSlide = (isFromButton: boolean | Event = false) => {
     setTimeout(() => {
       currentIndex.value++
       isAnimate.value = false
-      // 翻页后重置滚动位置
       nextTick(() => {
         const container = document.querySelector('.mode-mobile .content-main')
         if (container) container.scrollTop = 0
@@ -540,6 +546,10 @@ const nextSlide = (isFromButton: boolean | Event = false) => {
 
 // --- 设备选择 ---
 const selectDevice = (mode: string) => {
+  // ⭐⭐⭐ 修改点：iPad或手机模式点击时，尝试触发全屏 ⭐⭐⭐
+  if (mode === 'tablet' || mode === 'mobile') {
+    triggerFullScreen()
+  }
   deviceMode.value = mode
   showDeviceSelector.value = false
 }
