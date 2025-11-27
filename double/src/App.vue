@@ -268,13 +268,13 @@ const slides = [
     backgroundImage: '/photos/1024.jpg', 
     gallery: [
       { img: '/photos/视频/1.5.png' ,text:'吃火锅的你' }, { img: '/photos/视频/7.png' ,text:'眼睛起雾了' },
-      { img: '/photos/视频/8.PNG' }, { img: '/photos/视频/9.png' },
+      { img: '/photos/视频/8.PNG',text:'外面好冷，心情好暖'  }, { img: '/photos/视频/9.png',text:'快递派送中...' },
       
-      { img: '/photos/视频/13.png' }, { img: '/photos/视频/12.png' },
-      { img: '/photos/视频/2.png' }, { img: '/photos/视频/1.png' },
+      { img: '/photos/视频/13.png',text:'可爱' }, { img: '/photos/视频/12.png',text:'一样可爱'  },
+      { img: '/photos/视频/2.png',text:'还记得吗，这是第一次视频哦'  }, { img: '/photos/视频/1.png' ,text:'后面的人在背书[捂嘴笑]' },
       
-      { img: '/photos/视频/10.PNG' }, { img: '/photos/视频/14.png' },
-      { img: '/photos/视频/15.PNG' }, { img: '/photos/视频/5.jpeg' }
+      { img: '/photos/视频/10.PNG',text:'蹲一会'  }, { img: '/photos/视频/14.png',text:'准备家教资料中...(认真版)' },
+      { img: '/photos/视频/15.PNG',text:'点赞'  }, { img: '/photos/视频/5.jpeg',text:'我爱Ty！ 车主：嗯..我知道了' }
     ],
     // 👇 正文修改：解释“停不下来”的含义，呼应前面的三年分别
     text: '从10月24日至今天，一天未断。原来所谓的“忙得没时间”在思念面前都是伪命题。\n\n因为想你这件事无法暂停，所以无论多忙，见你都是我必须完成的日常。这份不断的记录，是我对你“永远有空”的承诺。' 
