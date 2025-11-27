@@ -270,8 +270,8 @@ const slides = [
     backgroundType: 'image',
     backgroundImage: '/photos/1024.jpg', 
     gallery: [
-      { img: '/photos/视频/1.5.png' ,text:'吃火锅的你' }, { img: '/photos/视频/7.png' ,text:'眼睛起雾了' },
-      { img: '/photos/视频/8.PNG',text:'在街上边走边打视频哦'  }, { img: '/photos/视频/9.png',text:'快递派送中...' },
+      { img: '/photos/视频/1.5.png' ,text:'吃火锅的你' }, { img: '/photos/7.png' ,text:'眼睛起雾了' },
+      { img: '/photos/视频/8.PNG',text:'在街上边走边打视频哦'  }, { img: '/photos/9.png',text:'快递派送中...' },
       
       { img: '/photos/视频/13.png',text:'可爱' }, { img: '/photos/视频/12.png',text:'一样可爱'  },
       { img: '/photos/视频/2.png',text:'还记得吗，这是第一次视频哦'  }, { img: '/photos/视频/1.png' ,text:'后面的人在背书[捂嘴笑]' },
