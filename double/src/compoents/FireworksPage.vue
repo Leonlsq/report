@@ -108,7 +108,7 @@ const showRightClock = ref(false);
 
 // 左侧打字机相关
 const displayedFinalText = ref(''); 
-const fullFinalText = "\u3000\u3000其实我不记得和AI一起改了多少个 Bug， 也不记得熬了几个夜。 我只记得，在敲下每一行代码的时候， 脑海里全是你看到它时惊喜的样子。 只要你笑了，这一切就有了意义。\n\u3000\u3000汤悦，生日快乐！愿往后余生，年年岁岁有我。";
+const fullFinalText = "\u3000\u3000其实我不记得和AI一起改了多少个 Bug， 也不记得熬了几个夜。 我只记得，在敲下每一行代码的时候， 脑海里全是你看到它时惊喜的样子。 只要你笑了，这一切就有了意义。\n\u3000\u3000汤悦，生日快乐！愿往后余生，年年岁岁有你有我。";
 const isFinalTextTyping = ref(false);
 const TYPE_SPEED = 150; 
 

@@ -142,7 +142,7 @@ const slides = [
       { img: '/photos/ty/13.jpg', text: '热心舍友Ty（不要学打篮球了😨）' },
       { img: '/photos/ty/11.jpg', text: '拼豆作品集' },
       { img: '/photos/ty/6.jpg', text: '可爱的勺子碎了😭' },
-      { img: '/photos/ty/66.jpg', text: '跟我说了这件事之后就下单啦。宠你' },
+      { img: '/photos/ty/66.jpg', text: '跟我说了这件事之后就下单啦。爱你' },
       { img: '/photos/ty/5.jpg', text: 'Leon摄影有限公司出品' },
       { img: '/photos/ty/3.jpg', text: '最讨厌的化学' },
       { img: '/photos/ty/1.jpg', text: '现在我才知道这个叫乌萨琪' }
@@ -338,7 +338,7 @@ const slides = [
 
             从14岁那年的初遇，到19岁这年的重逢。中间走散的那两年，大概是命运为了让我们学会如何更好地去爱，才特意留出的空白。
 
-            回看这短短两个月，命运的算法真的太奇妙了。
+            回看这短短两个月，命运不仅让人出乎意料，也让人惊喜。
             如果那天我没有买那个面包机，如果那晚我没有发高烧，如果10月24日那个视频通话没有接通……我们依然是两条平行的线。但幸运的是，在无数个可能错过的分岔路口，我们都坚定地走向了对方。
 
             谢谢你，Ty。
@@ -770,6 +770,7 @@ onMounted(() => {
                   <div class="polaroid-mini-card">
                     <img :src="item.img" loading="lazy" />
                   </div>
+                  <p v-if="item.text" class="gallery-text">{{ item.text }}</p>
                 </div>
               </Transition>
             </div>
@@ -1329,5 +1330,33 @@ body, html {
 /* 手机端过渡页适配 */
 .mode-mobile .transition-content p {
   font-size: 1.5rem;
+}
+
+/* --- 修复 Batch Gallery 文字显示 --- */
+
+/* 电脑/平板端：文字稍微小一点 */
+.batch-grid .gallery-text {
+  font-size: 0.9rem !important;
+  margin-top: 5px !important;
+  line-height: 1.3 !important;
+  color: #555;
+}
+
+/* 📱 手机端：文字必须非常小，否则一行4个放不下 */
+.mode-mobile .batch-grid .gallery-text {
+  font-size: 0.55rem !important; /* 约 9px 大小 */
+  line-height: 1.1 !important;
+  margin-top: 3px !important;
+  white-space: normal !important; /* 允许换行 */
+  text-align: center !important;
+  width: 100%;
+  display: block !important; /* 强制显示 */
+}
+
+/* 调整一下卡片间距，给文字留点地盘 */
+.mode-mobile .batch-grid .gallery-item {
+  margin-bottom: 10px !important; /* 增加底部间距 */
+  vertical-align: top;
+  height: auto !important; /* 高度自适应 */
 }
 </style>
