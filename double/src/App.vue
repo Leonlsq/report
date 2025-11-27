@@ -16,7 +16,7 @@ const slides = [
   {
     type: 'cover', 
     image: '/photos/cover.jpg', 
-    printText: '14岁时的初遇，19岁时的重逢.\n这是我们的故事。', 
+    printText: '2025.9.27 - 2025.11.28\n这是一段属于我们，短而有幸的时光。', 
   },
   {
     type: 'content', 
