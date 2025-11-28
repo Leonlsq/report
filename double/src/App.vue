@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue' 
-// 👇 请确保路径正确
+// 👇 请确保这里的文件夹名字是对的，有时候是 components 有时候是 compoents，根据你实际文件夹修改
 import FireworksPage from './compoents/FireworksPage.vue'
 import iOSUnlockPage from './compoents/iOSUnlockPage.vue'
 
@@ -298,7 +298,9 @@ const slides = [
     ],
     text: '在15号那晚的眼泪擦干后，你教会了我关于爱最重要的一课。\n\n我不自信地问“是不是不合适”，你却坚定地告诉我：“情绪价值是可以被替代的，但一个有性格、有主见、鲜活的廖双祺，是无法替代的。”\n\n这句话，是我在慕尼黑收到过最好的礼物。它让我明白，爱不是扮演完美，而是两个真实的灵魂，相互认领。谢谢你，看见并拥抱了那个独一无二的我。从这一晚开始，我不再只想做那个只会逗你笑的Leon，因为我知道，你愿意接住我的泪水和抱怨。也就是从这一刻起，我觉得我们不再是“异地恋”，而是“在一起”。',
   },
-  防Gank这块，反侦察嘻嘻
+  
+  // 🟢🟢🟢 修复了这里：删除了原来的中文注释，它破坏了代码结构 🟢🟢🟢
+
   {
     type: 'transition',
     text: '与此同时...'
@@ -1335,7 +1337,6 @@ body, html {
 .mode-mobile .transition-content p {
   font-size: 1.5rem;
 }
-
 
 /* --- 修复 Batch Gallery 文字显示 --- */
 
